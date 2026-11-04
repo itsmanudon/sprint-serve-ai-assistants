@@ -39,8 +39,21 @@ export interface ModelTurn {
   latencyMs?: number;
 }
 
+/**
+ * Per-call overrides, so one assistant can use a fast tier for tool work and a
+ * deeper tier for writing. Anything left out uses the ASSISTANT_* defaults.
+ */
+export interface CallOptions {
+  baseUrl?: string;
+  apiKey?: string;
+  model?: string;
+  reasoningEffort?: string;
+  maxTokens?: number;
+  timeoutMs?: number;
+}
+
 export interface ModelClient {
-  complete(messages: ChatMessage[], tools: ToolDefinition[]): Promise<ModelTurn>;
+  complete(messages: ChatMessage[], tools: ToolDefinition[], options?: CallOptions): Promise<ModelTurn>;
 }
 
 export const assistantUnavailable = () =>
@@ -55,8 +68,10 @@ export function isAssistantConfigured(): boolean {
 }
 
 export const openAiCompatibleClient: ModelClient = {
-  async complete(messages, tools) {
+  async complete(messages, tools, options = {}) {
     if (!isAssistantConfigured()) throw assistantUnavailable();
+    const baseUrl = options.baseUrl ?? env.ASSISTANT_MODEL_BASE_URL;
+    const apiKey = options.apiKey ?? env.ASSISTANT_MODEL_API_KEY;
     let response: Response | undefined;
     const startedAt = Date.now();
     for (let attempt = 0; attempt < 2 && !response; attempt++) {
@@ -64,23 +79,24 @@ export const openAiCompatibleClient: ModelClient = {
       let status: number | undefined;
       try {
         const res = await fetch(
-          `${env.ASSISTANT_MODEL_BASE_URL.replace(/\/+$/, '')}/chat/completions`,
+          `${baseUrl.replace(/\/+$/, '')}/chat/completions`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${env.ASSISTANT_MODEL_API_KEY}`,
+              Authorization: `Bearer ${apiKey}`,
             },
             // tool_choice is left at its default: the Meta Model API accepts only "auto".
+            // A writing-only call sends no tools at all: some providers reject an empty list.
             body: JSON.stringify({
-              model: env.ASSISTANT_MODEL,
+              model: options.model ?? env.ASSISTANT_MODEL,
               messages,
-              tools,
+              ...(tools.length && { tools }),
               temperature: 0.2,
-              max_tokens: 1200,
-              reasoning_effort: env.ASSISTANT_REASONING_EFFORT,
+              max_tokens: options.maxTokens ?? 1200,
+              reasoning_effort: options.reasoningEffort ?? env.ASSISTANT_REASONING_EFFORT,
             }),
-            signal: AbortSignal.timeout(env.ASSISTANT_MODEL_TIMEOUT_MS),
+            signal: AbortSignal.timeout(options.timeoutMs ?? env.ASSISTANT_MODEL_TIMEOUT_MS),
           }
         );
         if (res.ok) {

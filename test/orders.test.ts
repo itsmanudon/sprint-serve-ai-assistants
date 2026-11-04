@@ -1,7 +1,9 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-process.env.DATABASE_FILE = ':memory:';
-process.env.NODE_ENV = 'test';
+vi.hoisted(() => {
+  process.env.DATABASE_FILE = ':memory:';
+  process.env.NODE_ENV = 'test';
+});
 
 import { getDb, DEMO_RESTAURANT_ID } from '../src/db/database';
 import { runWithTenantId } from '../src/config/tenant-context';

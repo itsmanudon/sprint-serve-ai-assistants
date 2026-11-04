@@ -49,6 +49,10 @@
   .switch { cursor: pointer; }
   .muted { color: var(--muted); font-size: 13px; }
   [hidden] { display: none !important; }
+  .trend { display: flex; align-items: flex-end; gap: 3px; height: 90px; margin-top: 6px; }
+  .trend div { flex: 1; background: var(--brand); opacity: .75; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .trend div:last-child { opacity: 1; }
+  .tier { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--muted); margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -74,6 +78,9 @@
         <div id="open"></div>
         <h2 style="margin-top:18px">Best sellers, last 7 days</h2>
         <div id="top"></div>
+        <h2 style="margin-top:18px">Revenue, last 30 days</h2>
+        <div class="trend" id="trend" role="img" aria-label="Daily revenue for the last 30 days"></div>
+        <div class="muted" id="trend-note"></div>
       </div>
     </div>
   </section>
@@ -96,7 +103,7 @@ const SUGGESTED = [
   'Which dishes are not selling in the last 30 days?',
   'Are any orders stuck right now?',
   'When are my busiest hours?',
-  'How is Dal Makhani selling this week?',
+  'Why did sales change this week, and what should I do?',
 ];
 
 function el(tag, attrs = {}, ...kids) {
@@ -110,21 +117,26 @@ const delta = (p, prev) => (p === null || p === undefined ? `no sales ${prev} to
 async function loadOverview() {
   const [status, ov] = await Promise.all([fetch('/api/status').then((r) => r.json()), fetch('/api/owner/overview').then((r) => r.json())]);
   $('#title').textContent = `${status.restaurant} · Owner`;
-  const [today, week, open, top] = ov.facts.map((f) => f.data);
-  const kpi = (k, v, s, cls = '') => el('div', { class: 'kpi' }, el('div', { class: 'k' }, k), el('div', { class: 'v' }, v), el('div', { class: `s ${cls}` }, s));
+  const t = ov.today.totals, w = ov.week.totals, open = ov.open;
+  const kpi = (k, v, sub, cls = '') => el('div', { class: 'kpi' }, el('div', { class: 'k' }, k), el('div', { class: 'v' }, v), el('div', { class: `s ${cls}` }, sub));
+  const trendCls = (p) => (p === null || p === undefined ? '' : p >= 0 ? 'up' : 'down');
   $('#kpis').replaceChildren(
-    kpi('Revenue today', inr(today.current.revenue), delta(today.changePercent.revenue, today.comparedWith), today.changePercent.revenue >= 0 ? 'up' : 'down'),
-    kpi('Orders today', String(today.current.orders), `${today.current.cancelledOrders} cancelled · ${today.current.assistantOrders} via assistant`),
-    kpi('This week', inr(week.current.revenue), delta(week.changePercent.revenue, week.comparedWith), week.changePercent.revenue >= 0 ? 'up' : 'down'),
+    kpi('Revenue today', inr(t.revenue.value), delta(t.revenue.changePercent, ov.today.comparedWith), trendCls(t.revenue.changePercent)),
+    kpi('Orders today', String(t.orders.value), `${t.cancelled_orders.value} cancelled · ${t.assistant_orders.value} via assistant`),
+    kpi('This week', inr(w.revenue.value), delta(w.revenue.changePercent, ov.week.comparedWith), trendCls(w.revenue.changePercent)),
     kpi('Open orders', String(open.open), open.overdue ? `${open.overdue} overdue` : 'none overdue', open.overdue ? 'down' : 'up'),
   );
   $('#open').replaceChildren(open.orders.length
     ? el('table', {}, el('tbody', {}, ...open.orders.map((o) => el('tr', {},
         el('td', {}, `#${o.number}`), el('td', {}, el('span', { class: 'pill' + (o.overdue ? ' late' : '') }, o.status)),
-        el('td', { class: 'num' }, `${o.minutesInStatus} min`), el('td', { class: 'num' }, `${o.items} items`)))))
+        el('td', { class: 'num' }, `${o.minutesInStatus} min`), el("td", { class: "num" }, `${o.items} ${o.items === 1 ? "item" : "items"}`)))))
     : el('div', { class: 'muted' }, 'Nothing open.'));
-  $('#top').replaceChildren(el('table', {}, el('tbody', {}, ...top.dishes.map((d) => el('tr', {},
-    el('td', {}, d.dish), el('td', { class: 'num' }, `${d.quantity} sold`), el('td', { class: 'num' }, inr(d.revenue)))))));
+  $('#top').replaceChildren(el('table', {}, el('tbody', {}, ...ov.top.rows.map((r) => el('tr', {},
+    el('td', {}, r.key), el('td', { class: 'num' }, `${r.values.items_sold.value} sold`), el('td', { class: 'num' }, inr(r.values.item_sales.value)))))));
+  const days = ov.trend.rows;
+  const max = Math.max(1, ...days.map((d) => d.values.revenue.value));
+  $('#trend').replaceChildren(...days.map((d) => el('div', { style: `height:${Math.round((d.values.revenue.value / max) * 100)}%`, title: `${d.key}: ${inr(d.values.revenue.value)}` })));
+  $('#trend-note').textContent = days.length ? `${days[0].key} to ${days[days.length - 1].key} · highest day ${inr(max)}` : '';
 }
 
 async function ask(text) {
@@ -141,7 +153,9 @@ async function ask(text) {
     typing.remove();
     if (!res.ok) throw new Error(data.error || 'The assistant is unavailable.');
     history.push({ role: 'assistant', content: data.reply });
-    const bubble = el('div', { class: 'bubble ai' }, data.reply);
+    const bubble = el('div', { class: 'bubble ai' });
+    bubble.append(el('div', { class: 'tier' }, data.depth === 'deep' ? `Deep analysis · ${data.answeredBy.model}` : `Quick answer · ${data.answeredBy.model}`));
+    bubble.append(el('div', {}, data.reply));
     if (data.unverifiedFigures?.length) bubble.append(el('div', { class: 'warn-note' }, `Check: ${data.unverifiedFigures.join(', ')} not found in the reports used.`));
     if (data.facts?.length) {
       const d = el('details', {}, el('summary', {}, `Figures used (${data.facts.map((f) => f.title).join('; ')})`));

@@ -1,4 +1,4 @@
-import type { ChatMessage, ModelClient, ModelTurn, ToolCall, ToolDefinition } from './model';
+import type { CallOptions, ChatMessage, ModelClient, ModelTurn, ToolCall, ToolDefinition } from './model';
 
 /** Usage of one model call. Providers omit figures; a missing one counts as 0. */
 export interface CallUsage {
@@ -60,6 +60,8 @@ export async function runToolLoop<R>(opts: {
   messages: ChatMessage[];
   tools: ToolDefinition[];
   maxCalls: number;
+  /** Model tier for every call of this loop; omitted means the defaults. */
+  callOptions?: CallOptions;
   /** `done` ends the loop with that result, skipping any remaining tool calls. */
   onToolCall(
     call: ToolCall,
@@ -79,7 +81,9 @@ export async function runToolLoop<R>(opts: {
   const usage = opts.usage ?? emptyUsage();
 
   for (let n = 0; n < maxCalls; n++) {
-    const turn = await client.complete(messages, tools);
+    const turn = opts.callOptions
+      ? await client.complete(messages, tools, opts.callOptions)
+      : await client.complete(messages, tools);
     Object.assign(usage, addCall(usage, callUsage(turn)));
     const toolCalls = turn.message.tool_calls ?? [];
     if (!toolCalls.length)

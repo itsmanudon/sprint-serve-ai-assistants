@@ -16,7 +16,8 @@
     "eval": "node scripts/assistant-eval.mjs",
     "stub": "node scripts/assistant-model-stub.mjs",
     "eval:adversarial": "node scripts/make-adversarial-data.mjs",
-    "db:reset": "tsx --disable-warning=ExperimentalWarning src/db/reset.ts"
+    "db:reset": "tsx --disable-warning=ExperimentalWarning src/db/reset.ts",
+    "eval:owner": "node --disable-warning=ExperimentalWarning scripts/owner-eval.mjs"
   },
   "dependencies": {
     "zod": "4.6.7"

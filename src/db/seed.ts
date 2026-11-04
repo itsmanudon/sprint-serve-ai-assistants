@@ -136,7 +136,7 @@ function seedHistory(db: DatabaseSync, data: SeedFile, now: Date): void {
     for (let k = 0; k < count; k++) {
       const hour = hours[Math.floor(random() * hours.length)];
       const at = dayStart + hour * 3_600_000 + Math.floor(random() * 3_600_000);
-      if (at > now.getTime() - 60 * 60_000) continue; // nothing in the last hour: those are live orders
+      if (at > now.getTime() - 20 * 60_000) continue; // the last 20 minutes belong to the live orders below
       const lines = new Map<string, { item: (typeof items)[number]; qty: number }>();
       const n = 1 + Math.floor(random() * 3);
       for (let j = 0; j < n; j++) {

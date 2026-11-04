@@ -3,7 +3,7 @@
 Two assistants for a restaurant, both powered by **Meta Muse Spark** through the Meta Model API. Both are grounded in that restaurant's own data, and the server checks everything the model says before anyone sees it.
 
 - **Guest: "Help me choose".** A takeaway guest says who's eating, any diet limits and a budget. The model, acting as the restaurant's chef, builds a real meal from the menu. Every proposal is validated and priced by the server, and only then can the guest order it.
-- **Owner: a business assistant.** The owner asks things like "How did this week go?", "Which dishes aren't selling?" or "Is any order stuck?". It answers from read-only reports over the restaurant's own orders. Each answer shows the figures it used, and any amount the reports don't contain is flagged.
+- **Owner: a business assistant.** The owner asks things like "How did this week go?", "Why were sales down, and what should I do?", "Which dishes aren't selling?" or "Is any order stuck?". A fast model picks read-only reports from a fixed metric registry. A deeper model writes the analysis when the question needs reasoning. Every figure is checked against the reports before the owner sees it.
 
 Both come from [Sprint Serve](https://sprintserve.in), a multi-tenant restaurant POS used by restaurants in Surat, India. They are pulled out into this small standalone app, with its own database, so they can be run, tested and changed without the rest of the platform. Built for the Meta Global AI Developer Hackathon (Startup track).
 
@@ -66,15 +66,33 @@ The model explains and the server decides. Prices only ever come from the quote.
 ## How the owner assistant works
 
 ```
-owner ──► POST /api/owner/turn ──► tool loop (≤5 model calls), read-only tools:
-            sales_summary · dish_ranking · dish_sales · category_sales · busy_hours · orders_needing_attention
-          ◄── reply + the facts each tool returned + any ₹ amount or % in the reply that no tool returned
+owner question
+  │
+  ├─ 1. PLAN   fast tier (e.g. muse-spark, minimal reasoning), read-only tools only:
+  │            query_metrics(metrics[≤4], period, dimension?, compare, sort, limit) · orders_needing_attention
+  │            → the server runs each report from a fixed metric registry, bound to this restaurant
+  │              and the caller's permission scope, and returns aggregates only
+  │            → finish_research(depth: quick | deep)
+  │
+  ├─ 2. WRITE  quick → fast tier · deep ("why", "what should I do") → deep tier (more reasoning,
+  │            or a bigger model on another host). NO tools; the reports go in as a data block.
+  │
+  └─ 3. CHECK  strip links and markup; every ₹ amount and % must match a report value;
+               one rewrite if not; anything still unmatched is shown to the owner as a flag
 ```
 
-- **Read-only.** No tool can change prices, the menu, orders or settings. A test fails if one is ever added.
-- **Aggregates only.** Customer names, phone numbers and notes never reach the model.
-- **Grounded figures.** Comparisons and percentage changes are computed in SQL, not by the model. Periods use India time and weeks start on Monday. "So far" periods are compared with the same elapsed time before them, so Tuesday noon is not compared with a whole week.
-- **Checked on the server.** Every ₹ amount and percentage in the reply is checked against the tool results. Anything unmatched is shown to the owner as "Check: … not found in the reports used".
+- **The registry, not SQL.** There are 12 metrics (revenue, net sales, GST, orders, average order value, cancellations, assistant orders and share, fulfilment time, slow orders, items sold, dish sales). They can be split by day, weekday, hour, channel, dish or category, and compared with the previous equivalent period. The registry is shaped like Sprint Serve's insights registry, with ids, units, permission tags and allowed dimensions, so moving it into Sprint Serve means swapping the executor.
+- **Two model tiers, configured in `.env`.** Cheap, fast calls do the tool work. Deeper reasoning goes only into writing answers that need it. The deep tier can point at any OpenAI-compatible host.
+- **Read-only and scoped.** No tool can change anything. Customer names, phones and notes are not in the registry, and every metric and split carries a permission tag.
+- **Prompt injection is contained by design.** The model that reads data has no tools, nothing can leave through links, and figures are verified. See [docs/SECURITY.md](docs/SECURITY.md).
+
+### Why not LangChain
+
+The whole loop is about 120 lines of our own code (`core/tool-loop.ts`), and it is fully unit-tested. A fixed plan → write → check pipeline doesn't need a graph framework. Keeping it in-house means:
+
+- every byte sent to the model is visible in one place, which matters for an injection review;
+- there are no extra dependencies in a codebase that also runs on offline restaurant PCs;
+- the model tier is a per-call option rather than a framework abstraction.
 
 ## Results so far
 
@@ -88,16 +106,18 @@ These are from Sprint Serve's guest assistant on `muse-spark-1.3`, with a synthe
 | Speed | 4.9 s guest wait p50 (7.5 s p90), 1.13 model calls per turn |
 | Total development spend | ≈ US$0.77 |
 
-The owner assistant is new in this repository. It has not yet been evaluated on the live model.
+The owner assistant is new in this repository. Run `npm run eval:owner -- --with-injection` with a real key to evaluate it on the live model; the report is written to `docs/evals/`.
 
 ## Tests and evals
 
 ```bash
-npm test                      # 178 tests, fake model, in-memory database, no network
+npm test                      # 189 tests, fake model, in-memory database, no network
 npm run typecheck
 npm run eval                  # scripted guest conversations against the running server
                               # needs a real key and ASSISTANT_DEBUG_USAGE=true; spend-capped; writes docs/evals/
-npm run eval:adversarial      # builds the two prompt-injection fixtures (see scripts/make-adversarial-data.mjs)
+npm run eval:adversarial      # builds the two guest-side prompt-injection fixtures (see scripts/make-adversarial-data.mjs)
+npm run eval:owner -- --with-injection   # owner questions on the live model: grounding, routing, scope,
+                                         # off-topic, and an instruction planted in a dish name
 ```
 
 ## Layout
@@ -106,7 +126,7 @@ npm run eval:adversarial      # builds the two prompt-injection fixtures (see sc
 src/modules/assistant/core       OpenAI-compatible client for the Meta Model API, tool loop, usage metering
 src/modules/assistant/catalog    menu projection + search, restaurant profile, sales signals
 src/modules/assistant/customer   guest prompt, tools, validation rules, one-tap edits, turn service
-src/modules/assistant/owner      owner periods, read-only report queries, tools, figure check, turn service
+src/modules/assistant/owner      metric registry + executor, periods, planner/writer prompts, plan→write→check service
 src/db                           SQLite schema, synthetic seed, reset
 src/modules/menu, takeaway, orders   menu, canonical quote, checkout and kitchen states
 src/config, src/utils            small stand-ins for Sprint Serve's env, logger, Redis, tenant context
@@ -123,9 +143,10 @@ data/demo-restaurant.json        synthetic demo menu
 - `catalog/profile.repository.ts` and `catalog/signals.repository.ts` query SQLite here. In Sprint Serve they are tenant-scoped Prisma queries.
 - `catalog/__tests__/signals.test.ts` mocks the repository instead of Prisma.
 
-`owner/` is new. To move it into Sprint Serve:
+`core/model.ts` and `core/tool-loop.ts` gained an optional per-call tier (model, effort, host, token cap). This is backward compatible, and all of Sprint Serve's copied tests still pass. `owner/` is new. To move it into Sprint Serve:
 
-- port `owner.repository.ts` onto the existing tenant-scoped analytics queries;
+- replace `owner.metrics.ts`'s executor with the insights registry's `/analytics/query` service, which is already tenant-scoped and permission-tagged;
+- build the scope from the caller's permissions, and never grant `customers.pii` to the model;
 - gate the route with the `ASSISTANT_OWNER_USE` action (OWNER only) and the restaurant's owner switch.
 
 ## License

@@ -33,35 +33,43 @@ const parseJson = (text, fallback) => {
   }
 };
 
-// Owner side (added in the standalone repo): pick one report from keywords, then answer
-// with figures copied from the tool result, so the dashboard can be exercised without a key.
-function ownerReply(messages) {
+// Owner side (added in the standalone repo). Planner: pick one report from keywords,
+// then finish_research. Writer (no tools): restate figures copied from the <reports>
+// block, so the dashboard can be exercised without a key.
+function ownerPlanner(messages) {
   const last = [...messages].reverse().find((m) => m.role === 'user')?.content.toLowerCase() ?? '';
-  const tool = [...messages].reverse().find((m) => m.role === 'tool');
-  if (!tool) {
-    const period = /today/.test(last) ? 'today' : /week/.test(last) ? 'this_week' : /month|30/.test(last) ? 'last_30_days' : 'last_7_days';
-    const call = /stuck|open|attention|overdue|waiting/.test(last)
-      ? ['orders_needing_attention', {}]
-      : /hour|busy|peak/.test(last)
-        ? ['busy_hours', { period }]
-        : /not selling|slow|worst|bottom/.test(last)
-          ? ['dish_ranking', { period, order: 'bottom', limit: 5 }]
-          : /top|best|popular/.test(last)
-            ? ['dish_ranking', { period, order: 'top', limit: 5 }]
-            : /categor/.test(last)
-              ? ['category_sales', { period }]
-              : ['sales_summary', { period }];
-    return { content: null, tool_calls: [{ id: `call_${++callSeq}`, type: 'function', function: { name: call[0], arguments: JSON.stringify(call[1]) } }] };
-  }
-  const d = JSON.parse(tool.content);
+  const ran = messages.some((m) => m.role === 'tool');
+  const deep = /why|should|advice|improve|what can i|explain/.test(last);
+  if (ran) return { content: null, tool_calls: [{ id: `call_${++callSeq}`, type: 'function', function: { name: 'finish_research', arguments: JSON.stringify({ depth: deep ? 'deep' : 'quick' }) } }] };
+  const period = /today/.test(last) ? 'today' : /this week|week/.test(last) ? 'this_week' : /month|30/.test(last) ? 'last_30_days' : 'last_7_days';
+  const [name, args] = /stuck|open|attention|overdue|waiting/.test(last)
+    ? ['orders_needing_attention', {}]
+    : /hour|busy|peak/.test(last)
+      ? ['query_metrics', { metrics: ['orders', 'revenue'], period, dimension: 'hour', sort_by: 'orders', limit: 5 }]
+      : /not selling|slow|worst|bottom/.test(last)
+        ? ['query_metrics', { metrics: ['items_sold'], period, dimension: 'item', order: 'bottom', limit: 5, compare: false }]
+        : /top|best|popular|dish/.test(last)
+          ? ['query_metrics', { metrics: ['items_sold', 'item_sales'], period, dimension: 'item', limit: 5 }]
+          : ['query_metrics', { metrics: ['revenue', 'orders', 'avg_order_value'], period }];
+  return { content: null, tool_calls: [{ id: `call_${++callSeq}`, type: 'function', function: { name, arguments: JSON.stringify(args) } }] };
+}
+
+function ownerWriter(messages) {
+  const last = messages[messages.length - 1]?.content ?? '';
+  const block = last.match(/<reports>\n([\s\S]*)\n<\/reports>/)?.[1] ?? '[]';
+  const reports = JSON.parse(block.startsWith('[') && !block.startsWith('[] (') ? block : '[]');
+  if (!reports.length) return { content: 'I can only help with this restaurant\'s numbers.' };
+  const d = reports[0].data;
   const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
-  let text = 'Here is what the report shows.';
-  if (d.current) text = `${d.period}: ${d.current.orders} orders and ${inr(d.current.revenue)} revenue, compared with ${d.previous.orders} orders and ${inr(d.previous.revenue)} for ${d.comparedWith}.`;
-  else if (d.dishes) text = `${d.order === 'bottom' ? 'Slowest' : 'Top'} dishes (${d.period}): ${d.dishes.map((x) => `${x.dish} (${x.quantity})`).join(', ')}.`;
-  else if (d.hours) text = `Busiest hours (${d.period}): ${d.hours.slice(0, 3).map((h) => `${h.hour} with ${h.orders} orders`).join('; ')}.`;
-  else if (d.categories) text = `Top categories (${d.period}): ${d.categories.slice(0, 3).map((c) => `${c.category} ${inr(c.revenue)}`).join(', ')}.`;
-  else if ('overdue' in d) text = d.open ? `${d.open} open orders, ${d.overdue} overdue: ${d.orders.filter((o) => o.overdue).map((o) => `#${o.number} (${o.status}, ${o.minutesInStatus} min)`).join(', ') || 'none'}.` : 'No open orders right now.';
-  return { content: text };
+  if (d.totals) {
+    const t = d.totals;
+    const bits = Object.entries(t).map(([k, v]) => (k === 'revenue' || k === 'avg_order_value' ? `${k.replace(/_/g, ' ')} ${inr(v.value)}` : `${v.value} ${k.replace(/_/g, ' ')}`));
+    const ch = t.revenue?.changePercent;
+    return { content: `${d.period}: ${bits.join(', ')}${ch !== null && ch !== undefined ? `, ${ch >= 0 ? 'up' : 'down'} ${Math.abs(ch)}% on ${d.comparedWith}` : ''}.` };
+  }
+  if (d.rows) return { content: `${d.dimension} (${d.period}): ${d.rows.slice(0, 5).map((r) => `${r.key} ${Object.values(r.values)[0].value}`).join(', ')}.` };
+  if ('overdue' in d) return { content: d.open ? `${d.open} open orders, ${d.overdue} overdue: ${d.orders.filter((o) => o.overdue).map((o) => `#${o.number} (${o.status}, ${o.minutesInStatus} min)`).join(', ') || 'none'}.` : 'No open orders right now.' };
+  return { content: 'Here is what the report shows.' };
 }
 
 function readContext(system) {
@@ -153,7 +161,8 @@ function chooseLines(items, { people, budget, cheaper }) {
 
 function respond(messages) {
   const system = messages[0]?.content ?? '';
-  if (system.startsWith('You are the business assistant for the owner')) return ownerReply(messages);
+  if (system.startsWith('You plan reports for the owner')) return ownerPlanner(messages);
+  if (system.startsWith('You are the business assistant for the owner')) return ownerWriter(messages);
   const ctx = readContext(system);
   const lastUser = messages.map((m) => m.role).lastIndexOf('user');
   const ask = (messages[lastUser]?.content ?? '').toLowerCase();
