@@ -1,0 +1,29 @@
+{
+  "name": "sprint-serve-meal-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Help-me-choose meal assistant for restaurant takeaway, powered by Meta Muse Spark. Extracted from Sprint Serve to prototype and demo standalone.",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "eval": "node scripts/assistant-eval.mjs",
+    "stub": "node scripts/assistant-model-stub.mjs",
+    "eval:adversarial": "node scripts/make-adversarial-data.mjs"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.37",
+    "tsx": "4.19.4",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
+  }
+}

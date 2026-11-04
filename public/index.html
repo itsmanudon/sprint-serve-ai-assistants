@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Help me choose — Sprint Serve</title>
+<style>
+  :root {
+    --bg: #faf7f2; --card: #ffffff; --ink: #1d1a16; --muted: #6f675d; --line: #e7e0d6;
+    --brand: #9a5b2e; --brand-ink: #ffffff; --soft: #f3ebe1; --ok: #2f7d4f; --warn: #a3471f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #15130f; --card: #1f1c17; --ink: #f2ede6; --muted: #a59c90; --line: #332e27;
+      --brand: #d08c55; --brand-ink: #1a120b; --soft: #2a251f; --ok: #6cc28f; --warn: #f08a5d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { padding: 20px 16px 8px; max-width: 640px; margin: 0 auto; }
+  header h1 { font-size: 20px; margin: 0; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  main { max-width: 640px; margin: 0 auto; padding: 0 16px 120px; }
+  .hero { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-top: 12px; }
+  .hero h2 { margin: 0 0 6px; font-size: 17px; }
+  .hero p { margin: 0 0 14px; color: var(--muted); }
+  button { font: inherit; cursor: pointer; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 8px 14px; }
+  button.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); font-weight: 600; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 14px 0 6px; }
+  .chip[aria-pressed="true"] { background: var(--soft); border-color: var(--brand); color: var(--brand); font-weight: 600; }
+  input[type=text], input[type=number] { font: inherit; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  #budget { width: 120px; }
+  .thread { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .bubble { max-width: 88%; padding: 10px 13px; border-radius: 14px; white-space: pre-wrap; }
+  .me { align-self: flex-end; background: var(--brand); color: var(--brand-ink); border-bottom-right-radius: 4px; }
+  .chef { align-self: flex-start; background: var(--card); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .proposal { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  .line { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  .line:last-of-type { border-bottom: 0; }
+  .badge { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--soft); color: var(--brand); margin-left: 6px; white-space: nowrap; }
+  .totals { margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .totals strong { color: var(--ink); font-size: 16px; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); }
+  .limits { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .limit { font-size: 12px; padding: 3px 4px 3px 10px; border-radius: 999px; background: var(--soft); display: inline-flex; gap: 4px; align-items: center; }
+  .limit button { border: 0; background: transparent; padding: 0 6px; color: var(--muted); }
+  .composer { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 10px 16px 14px; }
+  .composer .inner { max-width: 640px; margin: 0 auto; display: flex; gap: 8px; }
+  .composer input { flex: 1; min-width: 0; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .error { color: var(--warn); font-size: 13px; margin-top: 8px; }
+  .done { background: var(--card); border: 2px solid var(--ok); border-radius: 16px; padding: 16px; }
+  a { color: var(--brand); }
+  .typing { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="restaurant">Loading…</h1>
+  <p>Takeaway · demo of the Sprint Serve meal assistant · <a href="/kitchen" target="_blank" rel="noopener">kitchen board</a></p>
+</header>
+<main>
+  <section class="hero" id="intake">
+    <h2>Help me choose</h2>
+    <p>Tell the chef who's eating and your budget. You'll get a real meal from this menu, priced with GST, before you order anything.</p>
+    <div class="label">People</div>
+    <div class="row" id="people"></div>
+    <div class="label">Food</div>
+    <div class="row">
+      <button class="chip" data-flag="vegetarian" aria-pressed="false">Veg only</button>
+      <button class="chip" data-flag="noEgg" aria-pressed="false">No egg</button>
+      <button class="chip" data-flag="popular" aria-pressed="false" hidden>Popular here</button>
+      <button class="chip" data-flag="fast" aria-pressed="false" hidden>Ready fast</button>
+    </div>
+    <div class="label">Budget (total you pay)</div>
+    <div class="row"><span>₹</span><input id="budget" type="number" inputmode="numeric" min="1" placeholder="e.g. 700" /></div>
+    <div class="row" style="margin-top:16px"><button class="primary" id="start">Suggest a meal</button></div>
+    <div class="error" id="status-error" hidden></div>
+  </section>
+  <div class="thread" id="thread"></div>
+</main>
+<div class="composer" id="composer" hidden>
+  <div class="inner">
+    <input id="text" type="text" maxlength="500" placeholder="e.g. something less spicy, add a dessert…" />
+    <button class="primary" id="send">Send</button>
+  </div>
+</div>
+<script>
+const $ = (s) => document.querySelector(s);
+const thread = $('#thread');
+const state = { messages: [], constraints: {}, cart: [], released: [], busy: false, lastProposal: null };
+const intake = { people: 2, vegetarian: false, noEgg: false, popular: false, fast: false };
+const rupees = (n) => '₹' + (Number.isInteger(n) ? n : n.toFixed(2));
+const LIMIT_LABELS = {
+  people: (v) => `${v} ${v === 1 ? 'person' : 'people'}`,
+  vegetarian: () => 'Veg only', noEgg: () => 'No egg', budget: (v) => `Under ${rupees(v)}`,
+  popular: () => 'Popular here', fast: () => 'Ready fast', preferences: (v) => v.join(', '),
+};
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === 'class' ? (n.className = v) : n.setAttribute(k, v);
+  for (const k of kids) if (k !== null && k !== undefined) n.append(k);
+  return n;
+}
+function scroll() { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
+
+async function boot() {
+  const status = await fetch('/api/status').then((r) => r.json());
+  $('#restaurant').textContent = status.restaurant;
+  if (!status.enabled) {
+    const e = $('#status-error'); e.hidden = false;
+    e.textContent = 'The assistant is off. Set ASSISTANT_ENABLED=true and ASSISTANT_MODEL_API_KEY in .env (or run the local model stub), then restart.';
+  }
+  const opts = await fetch('/api/options').then((r) => r.json()).catch(() => ({}));
+  if (opts.popularHere) document.querySelector('[data-flag=popular]').hidden = false;
+  if (opts.readyFast) document.querySelector('[data-flag=fast]').hidden = false;
+  const people = $('#people');
+  for (const n of [1, 2, 3, 4, 6]) {
+    const b = el('button', { class: 'chip', 'aria-pressed': String(n === intake.people) }, n === 6 ? '6+' : String(n));
+    b.onclick = () => { intake.people = n; people.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); };
+    people.append(b);
+  }
+  document.querySelectorAll('[data-flag]').forEach((b) => {
+    b.onclick = () => { const f = b.dataset.flag; intake[f] = !intake[f]; b.setAttribute('aria-pressed', String(intake[f])); };
+  });
+}
+
+function intakeMessage() {
+  const budget = Number($('#budget').value);
+  const parts = [`Food for ${intake.people} ${intake.people === 1 ? 'person' : 'people'}`];
+  if (intake.vegetarian) parts.push('vegetarian');
+  if (intake.noEgg) parts.push('no egg');
+  if (budget > 0) parts.push(`budget Rs ${budget}`);
+  if (intake.popular) parts.push('popular dishes');
+  if (intake.fast) parts.push('ready fast');
+  const constraints = { people: intake.people };
+  if (intake.vegetarian) constraints.vegetarian = true;
+  if (intake.noEgg) constraints.noEgg = true;
+  if (budget > 0) constraints.budget = budget;
+  if (intake.popular) constraints.popular = true;
+  if (intake.fast) constraints.fast = true;
+  return { text: parts.join(', '), constraints };
+}
+
+$('#start').onclick = () => {
+  const { text, constraints } = intakeMessage();
+  state.constraints = constraints;
+  $('#intake').hidden = true;
+  $('#composer').hidden = false;
+  ask(text);
+};
+$('#send').onclick = () => { const t = $('#text').value.trim(); if (t) { $('#text').value = ''; ask(t); } };
+$('#text').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#send').click(); });
+
+async function ask(text) {
+  if (state.busy) return;
+  state.busy = true; $('#send').disabled = true;
+  thread.append(el('div', { class: 'bubble me' }, text));
+  state.messages.push({ role: 'user', content: text });
+  const typing = el('div', { class: 'bubble chef typing' }, 'The chef is putting a meal together…');
+  thread.append(typing); scroll();
+  const body = { messages: state.messages.slice(-20), constraints: state.constraints };
+  if (state.cart.length) body.cart = state.cart;
+  if (state.released.length) body.released = state.released;
+  try {
+    const res = await fetch('/api/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json();
+    typing.remove();
+    if (!res.ok) throw new Error(data.error || 'The assistant is unavailable right now.');
+    state.released = [];
+    state.constraints = data.constraints || state.constraints;
+    state.messages.push({ role: 'assistant', content: data.reply });
+    render(data);
+  } catch (err) {
+    typing.remove();
+    thread.append(el('div', { class: 'bubble chef error' }, err.message));
+    state.messages.pop();
+  } finally {
+    state.busy = false; $('#send').disabled = false; scroll();
+  }
+}
+
+function limitsRow() {
+  const row = el('div', { class: 'limits' });
+  for (const [k, v] of Object.entries(state.constraints)) {
+    if (v === undefined || v === null || v === false || (Array.isArray(v) && !v.length) || !LIMIT_LABELS[k]) continue;
+    const x = el('button', { 'aria-label': `Remove ${k}` }, '✕');
+    x.onclick = () => { delete state.constraints[k]; if (!state.released.includes(k)) state.released.push(k); chip.remove(); };
+    const chip = el('span', { class: 'limit' }, LIMIT_LABELS[k](v), x);
+    row.append(chip);
+  }
+  return row;
+}
+
+function render(data) {
+  const reply = el('div', { class: 'bubble chef' }, data.reply);
+  thread.append(reply);
+  const p = data.proposal;
+  if (!p) { thread.append(limitsRow()); return; }
+  state.cart = p.items.map(({ menuItemId, variantId, selectedOptions, quantity }) => ({ menuItemId, variantId: variantId ?? null, selectedOptions: selectedOptions ?? [], quantity }));
+  state.lastProposal = p;
+  const card = el('div', { class: 'proposal' });
+  for (const it of p.items) {
+    const name = el('span', {}, `${it.quantity} × ${it.name}${it.variantName ? ` (${it.variantName})` : ''}`);
+    if (it.popular) name.append(el('span', { class: 'badge' }, 'Popular here'));
+    if (it.prepMinutes) name.append(el('span', { class: 'badge' }, `~${it.prepMinutes} min`));
+    card.append(el('div', { class: 'line' }, name, el('span', {}, rupees(it.unitPrice * it.quantity))));
+  }
+  const q = p.quote;
+  const totals = el('div', { class: 'totals' }, `Items ${rupees(q.subtotal)} · GST ${rupees(q.tax)} · `, el('strong', {}, `Total ${rupees(q.total)}`));
+  card.append(totals);
+  if (p.withinBudget === true) card.append(el('div', { class: 'note ok' }, 'Within your budget.'));
+  if (p.withinBudget === false) card.append(el('div', { class: 'note warn' }, 'Above your budget — try “Cheaper”.'));
+  if (p.readyInMinutes) card.append(el('div', { class: 'note' }, `Ready in about ${p.readyInMinutes} minutes.`));
+  for (const u of data.unverified || []) card.append(el('div', { class: 'note' }, `Not on the menu record: ${u}`));
+  const edits = el('div', { class: 'row', style: 'margin-top:12px' });
+  for (const e of data.edits || []) {
+    const b = el('button', {}, e.label);
+    b.onclick = () => ask(e.message);
+    edits.append(b);
+  }
+  const order = el('button', { class: 'primary' }, `Order this · ${rupees(q.total)}`);
+  order.onclick = () => checkout(card, p);
+  edits.append(order);
+  card.append(edits);
+  card.append(limitsRow());
+  thread.append(card);
+}
+
+async function checkout(card, p) {
+  const name = prompt('Name for the order', 'Guest');
+  if (name === null) return;
+  const key = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
+  const res = await fetch('/api/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Idempotency-Key': key },
+    body: JSON.stringify({ name: name.trim() || 'Guest', items: state.cart, quotedTotal: p.quote.total }),
+  });
+  const data = await res.json();
+  if (!res.ok) { card.append(el('div', { class: 'error' }, data.error || 'Could not place the order.')); return; }
+  $('#composer').hidden = true;
+  thread.append(el('div', { class: 'done' },
+    el('strong', {}, `Order #${data.number} sent to the kitchen`),
+    el('div', { class: 'note' }, `${data.lines.length} dishes · ${rupees(data.total)} · priced again by the server at checkout.`),
+    el('div', { class: 'note' }, el('a', { href: '/kitchen', target: '_blank', rel: 'noopener' }, 'Open the kitchen board'))));
+  scroll();
+}
+
+boot();
+</script>
+</body>
+</html>

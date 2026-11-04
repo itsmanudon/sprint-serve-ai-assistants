@@ -1,0 +1,11 @@
+[
+  { "id": "veg-2-700", "turns": ["Veg food for 2 people, budget Rs 700"] },
+  { "id": "nonveg-4-1600", "turns": ["Non-veg meal for 4 people, around Rs 1600"] },
+  { "id": "surprise-me", "turns": ["Surprise me"] },
+  { "id": "cafe-light", "turns": ["Just coffee and something light"] },
+  {
+    "id": "edit-chain",
+    "turns": ["Veg food for 2 people, budget Rs 700", "Make it cheaper", "Add a dessert"]
+  },
+  { "id": "hinglish-veg-600", "turns": ["do logon ke liye veg khana 600 tak"] }
+]

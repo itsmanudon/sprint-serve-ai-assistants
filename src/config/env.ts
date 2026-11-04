@@ -1,0 +1,33 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { z } from 'zod';
+
+/**
+ * Standalone stand-in for Sprint Serve's validated env. Same ASSISTANT_* names
+ * and defaults, so the assistant module runs unchanged. Reads ./.env if present.
+ */
+const envFile = resolve(process.cwd(), '.env');
+if (existsSync(envFile)) process.loadEnvFile(envFile);
+
+const bool = z
+  .enum(['true', 'false', '1', '0'])
+  .optional()
+  .transform((v) => v === 'true' || v === '1');
+
+const schema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  ASSISTANT_ENABLED: bool,
+  ASSISTANT_MODEL_BASE_URL: z.string().url().default('https://api.meta.ai/v1'),
+  ASSISTANT_MODEL: z.string().min(1).max(100).default('muse-spark-1.3'),
+  ASSISTANT_MODEL_API_KEY: z.string().min(10).optional(),
+  ASSISTANT_MODEL_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(20000),
+  ASSISTANT_DEBUG_USAGE: bool,
+  ASSISTANT_REASONING_EFFORT: z.enum(['minimal', 'low', 'medium', 'high']).default('minimal'),
+});
+
+const blankToUndefined = Object.fromEntries(
+  Object.entries(process.env).map(([k, v]) => [k, v === '' ? undefined : v])
+);
+
+export const env = schema.parse(blankToUndefined);

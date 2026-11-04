@@ -1,0 +1,1947 @@
+{
+  "id": "demo-restaurant",
+  "name": "Sprint Serve's Official Restaurant (For Demo)",
+  "note": "Synthetic demo data. Menu copied from the Sprint Serve dev seed; sales counts are invented for the demo.",
+  "chefNotes": "We cook North Indian food home-style and keep it mild unless a guest asks for heat. Our signature is the Dal Makhani; we like to serve it with Butter Naan. For a group, we suggest one main per two people plus breads.",
+  "orderingOpen": true,
+  "sales": {
+    "completedOrders30d": 142,
+    "sold": [
+      {
+        "menuItemId": "dal-makhani",
+        "quantity": 96
+      },
+      {
+        "menuItemId": "butter-naan",
+        "quantity": 180
+      },
+      {
+        "menuItemId": "butter-chicken",
+        "quantity": 88
+      },
+      {
+        "menuItemId": "garlic-naan",
+        "quantity": 120
+      },
+      {
+        "menuItemId": "paneer-tikka",
+        "quantity": 64
+      },
+      {
+        "menuItemId": "veg-biryani",
+        "quantity": 52
+      },
+      {
+        "menuItemId": "chicken-biryani",
+        "quantity": 58
+      },
+      {
+        "menuItemId": "mango-lassi",
+        "quantity": 70
+      },
+      {
+        "menuItemId": "gulab-jamun",
+        "quantity": 40
+      },
+      {
+        "menuItemId": "chole-kulcha",
+        "quantity": 35
+      },
+      {
+        "menuItemId": "margherita-pizza",
+        "quantity": 30
+      },
+      {
+        "menuItemId": "jeera-rice",
+        "quantity": 44
+      },
+      {
+        "menuItemId": "masala-chai",
+        "quantity": 50
+      },
+      {
+        "menuItemId": "virgin-mojito",
+        "quantity": 22
+      },
+      {
+        "menuItemId": "chocolate-milkshake",
+        "quantity": 18
+      }
+    ]
+  },
+  "categories": [
+    {
+      "id": "starters",
+      "name": "Starters",
+      "assistantRole": "STARTER",
+      "items": [
+        {
+          "id": "paneer-tikka",
+          "name": "Paneer Tikka",
+          "description": "Marinated cottage cheese grilled in tandoor with spices",
+          "price": 320,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 15,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "chicken-seekh-kebab",
+          "name": "Chicken Seekh Kebab",
+          "description": "Minced chicken with herbs and spices, skewered and grilled",
+          "price": 380,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "HOT",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "veg-spring-rolls",
+          "name": "Veg Spring Rolls",
+          "description": "Crispy rolls stuffed with fresh vegetables",
+          "price": 220,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 10,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "chicken-wings",
+          "name": "Chicken Wings",
+          "description": "Spicy buffalo chicken wings with blue cheese dip",
+          "price": 360,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "HOT",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "loaded-nachos",
+          "name": "Loaded Nachos",
+          "description": "Corn tortilla chips under melted cheese, jalapenos and salsa",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "keema-nachos",
+          "name": "Keema Nachos",
+          "description": "Tortilla chips loaded with spiced minced mutton and cheddar",
+          "price": 340,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "HOT",
+          "preparationTime": 15,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "masala-papad-chaat",
+          "name": "Masala Papad Chaat",
+          "description": "Roasted papad topped with onion, tomato and chaat masala",
+          "price": 120,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "mains",
+      "name": "Main Course",
+      "assistantRole": "MAIN",
+      "items": [
+        {
+          "id": "butter-chicken",
+          "name": "Butter Chicken",
+          "description": "Creamy tomato-based curry with tender chicken pieces",
+          "price": 450,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 25,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "nuts"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": [
+            {
+              "id": "butter-naan"
+            },
+            {
+              "id": "garlic-naan"
+            },
+            {
+              "id": "jeera-rice"
+            }
+          ]
+        },
+        {
+          "id": "dal-makhani",
+          "name": "Dal Makhani",
+          "description": "Slow-cooked black lentils in butter and cream",
+          "price": 320,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [
+            {
+              "id": "dal-makhani-half",
+              "name": "Half",
+              "price": 180,
+              "isDefault": false,
+              "isAvailable": true
+            },
+            {
+              "id": "dal-makhani-full",
+              "name": "Full",
+              "price": 320,
+              "isDefault": true,
+              "isAvailable": true
+            }
+          ],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": [
+            {
+              "id": "butter-naan"
+            },
+            {
+              "id": "garlic-naan"
+            },
+            {
+              "id": "jeera-rice"
+            }
+          ]
+        },
+        {
+          "id": "palak-paneer",
+          "name": "Palak Paneer",
+          "description": "Cottage cheese cubes in smooth spinach gravy",
+          "price": 360,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": [
+            {
+              "id": "garlic-naan"
+            },
+            {
+              "id": "butter-naan"
+            }
+          ]
+        },
+        {
+          "id": "veg-biryani",
+          "name": "Veg Biryani",
+          "description": "Fragrant basmati rice with seasonal vegetables and saffron",
+          "price": 340,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 30,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": [
+            {
+              "id": "mango-lassi"
+            }
+          ]
+        },
+        {
+          "id": "chicken-biryani",
+          "name": "Chicken Biryani",
+          "description": "Dum-cooked aromatic basmati rice with spiced chicken",
+          "price": 420,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 30,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": [
+            {
+              "id": "mango-lassi"
+            }
+          ]
+        },
+        {
+          "id": "chole-kulcha",
+          "name": "Chole Kulcha",
+          "description": "Amritsari stuffed kulcha with slow-cooked chickpea masala",
+          "price": 300,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 22,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": [
+            {
+              "id": "mango-lassi"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rice",
+      "name": "Rice",
+      "assistantRole": "RICE",
+      "items": [
+        {
+          "id": "jeera-rice",
+          "name": "Jeera Rice",
+          "description": "Basmati rice tempered with roasted cumin and whole spices",
+          "price": 180,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "breads",
+      "name": "Breads",
+      "assistantRole": "BREAD",
+      "items": [
+        {
+          "id": "butter-naan",
+          "name": "Butter Naan",
+          "description": "Soft leavened bread baked in tandoor with butter",
+          "price": 60,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "garlic-naan",
+          "name": "Garlic Naan",
+          "description": "Tandoor-baked flatbread topped with garlic and herbs",
+          "price": 70,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "beverages",
+      "name": "Beverages",
+      "assistantRole": "DRINK",
+      "items": [
+        {
+          "id": "mango-lassi",
+          "name": "Mango Lassi",
+          "description": "Chilled yoghurt drink blended with Alphonso mango pulp",
+          "price": 120,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "masala-chai",
+          "name": "Masala Chai",
+          "description": "Spiced Indian tea brewed with ginger, cardamom and milk",
+          "price": 60,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "desserts",
+      "name": "Desserts",
+      "assistantRole": "DESSERT",
+      "items": [
+        {
+          "id": "gulab-jamun",
+          "name": "Gulab Jamun",
+          "description": "Soft milk-solid dumplings soaked in rose-flavoured sugar syrup",
+          "price": 160,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "berry-cheesecake",
+          "name": "Berry Cheesecake",
+          "description": "Baked cheesecake under a berry gelatine mirror",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "blueberry-cheesecake",
+          "name": "Blueberry Cheesecake",
+          "description": "New York style cheesecake with blueberry compote",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "strawberry-cheesecake",
+          "name": "Strawberry Cheesecake",
+          "description": "Cheesecake topped with macerated strawberries",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "classic-cheesecake",
+          "name": "Classic Cheesecake",
+          "description": "Plain baked cheesecake, best with a pot of tea",
+          "price": 260,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "cheesecake-trio",
+          "name": "Cheesecake Trio",
+          "description": "Chocolate, fruit and vanilla slices on one plate",
+          "price": 340,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "brownie-sundae",
+          "name": "Brownie Sundae",
+          "description": "Warm brownie with ice cream, mint and icing sugar",
+          "price": 290,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs",
+            "nuts"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "chocolate-pie",
+          "name": "Chocolate Pie",
+          "description": "Dark chocolate ganache in a short crust shell",
+          "price": 270,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "mint-chocolate-cake",
+          "name": "Mint Chocolate Cake",
+          "description": "Chocolate sponge with mint chocolate topping",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "chocolate-cream-cake",
+          "name": "Chocolate Cream Cake",
+          "description": "Layered chocolate sponge under chocolate cream",
+          "price": 290,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Indian",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "soups",
+      "name": "Soups",
+      "assistantRole": "STARTER",
+      "items": [
+        {
+          "id": "cream-of-broccoli",
+          "name": "Cream of Broccoli",
+          "description": "Slow-simmered broccoli blended with cream and white pepper",
+          "price": 190,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Continental",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "broccoli-almond-soup",
+          "name": "Broccoli Almond Soup",
+          "description": "Broccoli veloute finished with toasted almond slivers",
+          "price": 210,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Continental",
+          "servingSize": null,
+          "allergens": [
+            "dairy",
+            "nuts"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "wild-mushroom-soup",
+          "name": "Wild Mushroom Soup",
+          "description": "Button and oyster mushrooms simmered with thyme and cream",
+          "price": 220,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 14,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Continental",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "roasted-tomato-shorba",
+          "name": "Roasted Tomato Shorba",
+          "description": "Vine tomatoes roasted with garlic and finished with basil oil",
+          "price": 180,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Continental",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "chicken-pho",
+          "name": "Chicken Pho",
+          "description": "Vietnamese rice noodle broth with poached chicken and herbs",
+          "price": 320,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Continental",
+          "servingSize": null,
+          "allergens": [
+            "soy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "chicken-noodle-soup",
+          "name": "Chicken Noodle Soup",
+          "description": "Clear chicken broth with egg noodles, garlic and spring onion",
+          "price": 240,
+          "isVeg": false,
+          "containsEgg": true,
+          "spicyLevel": "MILD",
+          "preparationTime": 15,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Continental",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "pizzaPasta",
+      "name": "Pizza & Pasta",
+      "assistantRole": "MAIN",
+      "items": [
+        {
+          "id": "margherita-pizza",
+          "name": "Margherita Pizza",
+          "description": "Hand-stretched base, San Marzano sauce, mushrooms and mozzarella",
+          "price": 420,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Italian",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "spaghetti-napoletana",
+          "name": "Spaghetti Napoletana",
+          "description": "Spaghetti tossed in slow-cooked tomato and basil sugo",
+          "price": 360,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Italian",
+          "servingSize": null,
+          "allergens": [
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "penne-alfredo",
+          "name": "Penne Alfredo",
+          "description": "Penne in a cream cheese sauce with cracked black pepper",
+          "price": 380,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Italian",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "fettuccine-funghi",
+          "name": "Fettuccine Funghi",
+          "description": "Fettuccine with sauteed mushrooms and aged parmesan",
+          "price": 420,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Italian",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "pasta-primavera",
+          "name": "Pasta Primavera",
+          "description": "Seasonal vegetables tossed through pasta with olive oil and herbs",
+          "price": 340,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Italian",
+          "servingSize": null,
+          "allergens": [
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "pasta-del-giorno",
+          "name": "Pasta Del Giorno",
+          "description": "Chef selection pasta of the day, ask your server",
+          "price": 400,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Italian",
+          "servingSize": null,
+          "allergens": [
+            "gluten"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "sushi",
+      "name": "Sushi",
+      "assistantRole": "MAIN",
+      "items": [
+        {
+          "id": "nigiri-selection",
+          "name": "Nigiri Selection",
+          "description": "Chef selection of fresh fish nigiri with ginger and wasabi",
+          "price": 620,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Japanese",
+          "servingSize": null,
+          "allergens": [
+            "fish",
+            "soy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "mixed-sushi-platter",
+          "name": "Mixed Sushi Platter",
+          "description": "Assorted nigiri and maki, sixteen pieces, for sharing",
+          "price": 980,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 25,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Japanese",
+          "servingSize": null,
+          "allergens": [
+            "fish",
+            "soy",
+            "sesame"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "crab-and-tuna-roll",
+          "name": "Crab and Tuna Roll",
+          "description": "Maki roll with crab stick, tuna, ginger and wasabi",
+          "price": 540,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Japanese",
+          "servingSize": null,
+          "allergens": [
+            "shellfish",
+            "fish",
+            "soy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "salmon-avocado-roll",
+          "name": "Salmon Avocado Roll",
+          "description": "Salmon, eel, avocado and cream cheese maki",
+          "price": 580,
+          "isVeg": false,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 18,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Japanese",
+          "servingSize": null,
+          "allergens": [
+            "fish",
+            "dairy",
+            "soy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "burgers",
+      "name": "Burgers & Sandwiches",
+      "assistantRole": "MAIN",
+      "items": [
+        {
+          "id": "double-cheeseburger",
+          "name": "Double Cheeseburger",
+          "description": "Two beef patties, cheddar and house sauce, with fries",
+          "price": 480,
+          "isVeg": false,
+          "containsEgg": true,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 20,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "American",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "sandwich-platter",
+          "name": "Sandwich Platter",
+          "description": "Assorted finger sandwiches on soft and seeded breads",
+          "price": 320,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "American",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "coffee",
+      "name": "Coffee",
+      "assistantRole": "DRINK",
+      "items": [
+        {
+          "id": "espresso",
+          "name": "Espresso",
+          "description": "Double shot of our house blend, thick crema",
+          "price": 140,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 4,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "ristretto",
+          "name": "Ristretto",
+          "description": "Short-pulled espresso, sweeter and more concentrated",
+          "price": 150,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 4,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "espresso-doppio",
+          "name": "Espresso Doppio",
+          "description": "Two full shots served long in a glass",
+          "price": 160,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 4,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "espresso-tonic",
+          "name": "Espresso Tonic",
+          "description": "Espresso poured over tonic and ice with an orange twist",
+          "price": 240,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "iced-americano",
+          "name": "Iced Americano",
+          "description": "Espresso over ice and orange cold-pressed juice",
+          "price": 220,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "iced-latte",
+          "name": "Iced Latte",
+          "description": "Double espresso, chilled milk and ice",
+          "price": 230,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "cold-brew-soda",
+          "name": "Cold Brew Soda",
+          "description": "Twelve-hour cold brew lengthened with soda and citrus",
+          "price": 250,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "french-press",
+          "name": "French Press",
+          "description": "Single-origin beans steeped and pressed at the table",
+          "price": 260,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "pour-over",
+          "name": "Pour Over",
+          "description": "Hand-poured filter coffee, changing single origin",
+          "price": 240,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "barista-special",
+          "name": "Barista Special",
+          "description": "Whatever the bar is excited about this week",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 7,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "matcha-latte",
+          "name": "Matcha Latte",
+          "description": "Ceremonial grade matcha whisked with milk over ice",
+          "price": 280,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "coolers",
+      "name": "Mocktails & Coolers",
+      "assistantRole": "DRINK",
+      "items": [
+        {
+          "id": "virgin-mojito",
+          "name": "Virgin Mojito",
+          "description": "Lime, mint and cane sugar lengthened with soda",
+          "price": 220,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "strawberry-mojito",
+          "name": "Strawberry Mojito",
+          "description": "Muddled strawberry, mint and lime over crushed ice",
+          "price": 240,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "virgin-mary",
+          "name": "Virgin Mary",
+          "description": "Spiced tomato, lemon and celery salt, no alcohol",
+          "price": 230,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MEDIUM",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "citrus-cooler",
+          "name": "Citrus Cooler",
+          "description": "Fresh lime, orange and a salted rim",
+          "price": 210,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "exotic-lime-cooler",
+          "name": "Exotic Lime Cooler",
+          "description": "Kaffir lime, lemongrass and soda",
+          "price": 230,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "berry-crush",
+          "name": "Berry Crush",
+          "description": "Mixed berries, lime and crushed ice",
+          "price": 250,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "pineapple-cooler",
+          "name": "Pineapple Cooler",
+          "description": "Pineapple, lime and mint, shaken and poured tall",
+          "price": 240,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "mint-lemonade",
+          "name": "Mint Lemonade",
+          "description": "House lemonade with mint, served over ice",
+          "price": 160,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 4,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "tropical-juice",
+          "name": "Tropical Juice",
+          "description": "Cold-pressed seasonal tropical fruit with lemon",
+          "price": 190,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "shakes",
+      "name": "Shakes & Smoothies",
+      "assistantRole": "DRINK",
+      "items": [
+        {
+          "id": "chocolate-milkshake",
+          "name": "Chocolate Milkshake",
+          "description": "Dark chocolate blended thick with vanilla ice cream",
+          "price": 260,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 7,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "strawberry-milkshake",
+          "name": "Strawberry Milkshake",
+          "description": "Strawberry shake topped with whipped cream and syrup",
+          "price": 260,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 7,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "berry-smoothie-bowl",
+          "name": "Berry Smoothie Bowl",
+          "description": "Blueberry and banana smoothie with coconut chips",
+          "price": 290,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 10,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "nuts"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "iced-chocolate",
+          "name": "Iced Chocolate",
+          "description": "Cold chocolate milk over ice, lightly sweetened",
+          "price": 230,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "hot-chocolate",
+          "name": "Hot Chocolate",
+          "description": "Steamed milk and dark chocolate under whipped cream",
+          "price": 240,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "melted-chocolate-cup",
+          "name": "Melted Chocolate Cup",
+          "description": "Warm couverture chocolate to sip, served small",
+          "price": 220,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "dairy"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    },
+    {
+      "id": "bakery",
+      "name": "Breakfast & Bakery",
+      "assistantRole": "OTHER",
+      "items": [
+        {
+          "id": "butter-croissant",
+          "name": "Butter Croissant",
+          "description": "All-butter croissant, laminated and baked each morning",
+          "price": 150,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "pain-au-chocolat",
+          "name": "Pain au Chocolat",
+          "description": "Laminated pastry with two batons of dark chocolate",
+          "price": 170,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 5,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "almond-chocolate-croissant",
+          "name": "Almond Chocolate Croissant",
+          "description": "Twice-baked croissant with chocolate and almond cream",
+          "price": 190,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "NONE",
+          "preparationTime": 6,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy",
+            "eggs",
+            "nuts"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "fruit-muesli-bowl",
+          "name": "Fruit Muesli Bowl",
+          "description": "Toasted muesli with yoghurt and sliced seasonal fruit",
+          "price": 240,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "NONE",
+          "preparationTime": 8,
+          "gstPercent": 5,
+          "isFeatured": true,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "dairy",
+            "nuts"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "garden-bowl",
+          "name": "Garden Bowl",
+          "description": "Grains, greens and roasted vegetables with tahini",
+          "price": 320,
+          "isVeg": true,
+          "containsEgg": false,
+          "spicyLevel": "MILD",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "sesame"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        },
+        {
+          "id": "breakfast-plate",
+          "name": "Breakfast Plate",
+          "description": "The morning plate, changing daily, ask your server",
+          "price": 290,
+          "isVeg": true,
+          "containsEgg": true,
+          "spicyLevel": "MILD",
+          "preparationTime": 12,
+          "gstPercent": 5,
+          "isFeatured": false,
+          "isAvailable": true,
+          "cuisine": "Cafe",
+          "servingSize": null,
+          "allergens": [
+            "gluten",
+            "eggs"
+          ],
+          "variants": [],
+          "modifierGroups": [],
+          "options": [],
+          "pairings": []
+        }
+      ]
+    }
+  ]
+}
