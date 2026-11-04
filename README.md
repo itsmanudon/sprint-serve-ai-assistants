@@ -7,6 +7,31 @@ Two assistants for a restaurant, both powered by **Meta Muse Spark** through the
 
 Both come from [Sprint Serve](https://sprintserve.in), a multi-tenant restaurant POS used by restaurants in Surat, India. They are pulled out into this small standalone app, with its own database, so they can be run, tested and changed without the rest of the platform. Built for the Meta Global AI Developer Hackathon (Startup track).
 
+> **Demo video:** _link added at submission_ · **Track:** Startup · **Theme:** Build for Your World
+
+## Why this exists
+
+Most of India's restaurants run on thin margins and busy counters. Guests know their budget and who's eating, but not the menu. Owners have the data in their POS but no time to read reports. These two assistants run inside a live restaurant POS, so they work from real menus and real orders, not a demo spreadsheet. They are built so a wrong price, a wrong number or a planted instruction cannot reach a guest or an owner unnoticed.
+
+```mermaid
+flowchart LR
+  subgraph Guest["Guest: Help me choose"]
+    G1[Guest: 2 people, veg, ₹700] --> P1[Muse Spark chef<br/>tools: search_menu, get_item, quote_cart, propose_meal]
+    P1 --> V1{Server validates<br/>real dishes · veg/no-egg · meal shape · budget incl. GST}
+    V1 -- rejected --> P1
+    V1 -- ok --> C1[Priced cart → normal checkout → kitchen]
+  end
+  subgraph Owner["Owner: business assistant"]
+    O1[Owner question<br/>English · हिन्दी · ગુજરાતી · voice] --> PL[PLAN · fast tier<br/>read-only reports from a fixed metric registry<br/>restaurant + permission scope from the session]
+    PL --> W[WRITE · fast or deep tier<br/>no tools · reports as data]
+    W --> CK{CHECK<br/>strip links · every ₹ and % must match a report}
+    CK -- mismatch: one rewrite --> W
+    CK --> A[Answer + figures used + flags]
+  end
+  DB[(Restaurant data<br/>SQLite here · PostgreSQL in Sprint Serve)] --> P1
+  DB --> PL
+```
+
 ## Run it
 
 You need Node 22.13 or newer. There is no Docker and no database server: the app uses Node's built-in SQLite.

@@ -52,6 +52,12 @@
   .trend { display: flex; align-items: flex-end; gap: 3px; height: 90px; margin-top: 6px; }
   .trend div { flex: 1; background: var(--brand); opacity: .75; border-radius: 3px 3px 0 0; min-height: 2px; }
   .trend div:last-child { opacity: 1; }
+  .briefing { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .briefing button.main { border: 0; background: var(--brand); color: var(--brand-ink); border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+  .meta-line { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .mic { border: 1px solid var(--line) !important; background: var(--card) !important; color: var(--ink) !important; }
+  .mic.on { background: var(--warn) !important; color: #fff !important; }
+  select.lang { font: inherit; font-size: 13px; padding: 7px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
   .tier { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--muted); margin-bottom: 4px; }
 </style>
 </head>
@@ -69,9 +75,15 @@
     <div class="layout">
       <div class="panel">
         <h2>Ask about your restaurant</h2>
+        <div class="briefing"><button class="main" id="brief">☀️ Morning briefing</button><span class="muted">A short read on yesterday, this week, slipping dishes and stuck orders.</span></div>
         <div class="suggest" id="suggest"></div>
         <div class="thread" id="thread"><div class="muted">Answers come only from your own orders. Each answer shows the figures it used.</div></div>
-        <div class="composer"><input id="q" maxlength="500" placeholder="e.g. Which dishes are not selling this month?" /><button id="ask">Ask</button></div>
+        <div class="composer">
+          <select class="lang" id="lang" aria-label="Voice language"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="gu-IN">ગુજરાતી</option></select>
+          <button class="mic" id="mic" title="Ask by voice" hidden>🎤</button>
+          <input id="q" maxlength="500" placeholder="Ask in English, हिन्दी or ગુજરાતી…" /><button id="ask">Ask</button>
+        </div>
+        <div class="muted" id="mic-note" hidden>Voice uses your browser's speech recognition; the question is sent as text.</div>
       </div>
       <div class="panel">
         <h2>Open orders</h2>
@@ -96,6 +108,7 @@
 const $ = (s) => document.querySelector(s);
 const inr = (n) => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 const history = [];
+const BRIEFING = 'Morning briefing: how did yesterday go compared with the day before, how is this week going compared with last week, which dish is slipping the most, and is any order stuck right now? Give three or four short points and one suggestion.';
 const SUGGESTED = [
   'How are we doing today compared with yesterday?',
   'How did this week go compared with last week?',
@@ -104,6 +117,7 @@ const SUGGESTED = [
   'Are any orders stuck right now?',
   'When are my busiest hours?',
   'Why did sales change this week, and what should I do?',
+  'આ અઠવાડિયે સૌથી વધુ શું વેચાયું?',
 ];
 
 function el(tag, attrs = {}, ...kids) {
@@ -147,6 +161,7 @@ async function ask(text) {
   const typing = el('div', { class: 'bubble ai typing' }, 'Checking your numbers…');
   thread.append(typing); thread.scrollTop = thread.scrollHeight;
   $('#ask').disabled = true;
+  const started = performance.now();
   try {
     const res = await fetch('/api/owner/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history.slice(-12) }) });
     const data = await res.json();
@@ -156,6 +171,8 @@ async function ask(text) {
     const bubble = el('div', { class: 'bubble ai' });
     bubble.append(el('div', { class: 'tier' }, data.depth === 'deep' ? `Deep analysis · ${data.answeredBy.model}` : `Quick answer · ${data.answeredBy.model}`));
     bubble.append(el('div', {}, data.reply));
+    const u = data.debug?.usage;
+    bubble.append(el('div', { class: 'meta-line' }, `${((performance.now() - started) / 1000).toFixed(1)} s${u ? ` · ${u.modelCalls} model calls · ${u.inputTokens + u.outputTokens} tokens` : ''} · ${data.facts.length} report${data.facts.length === 1 ? '' : 's'} · ${data.unverifiedFigures?.length ? 'figures need checking' : 'all figures checked ✓'}`));
     if (data.unverifiedFigures?.length) bubble.append(el('div', { class: 'warn-note' }, `Check: ${data.unverifiedFigures.join(', ')} not found in the reports used.`));
     if (data.facts?.length) {
       const d = el('details', {}, el('summary', {}, `Figures used (${data.facts.map((f) => f.title).join('; ')})`));
@@ -185,6 +202,21 @@ async function loadMenu() {
   }));
 }
 
+$('#brief').onclick = () => ask(BRIEFING);
+const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (Speech) {
+  $('#mic').hidden = false; $('#mic-note').hidden = false;
+  let rec = null;
+  $('#mic').onclick = () => {
+    if (rec) { rec.stop(); return; }
+    rec = new Speech(); rec.lang = $('#lang').value; rec.interimResults = true;
+    $('#mic').classList.add('on');
+    rec.onresult = (e) => { $('#q').value = [...e.results].map((r) => r[0].transcript).join(' '); };
+    rec.onend = () => { $('#mic').classList.remove('on'); rec = null; const t = $('#q').value.trim(); if (t) { $('#q').value = ''; ask(t); } };
+    rec.onerror = () => { $('#mic').classList.remove('on'); rec = null; };
+    rec.start();
+  };
+}
 for (const s of SUGGESTED) { const b = el('button', {}, s); b.onclick = () => ask(s); $('#suggest').append(b); }
 $('#ask').onclick = () => { const t = $('#q').value.trim(); if (t) { $('#q').value = ''; ask(t); } };
 $('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#ask').click(); });

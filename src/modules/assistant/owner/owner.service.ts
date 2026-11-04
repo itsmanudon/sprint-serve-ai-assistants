@@ -103,9 +103,20 @@ function titleFor(r: MetricResult): string {
   return `${names}${r.dimension ? ` by ${r.dimension.toLowerCase()}` : ''}: ${r.period}${r.comparedWith ? ` vs ${r.comparedWith}` : ''}`;
 }
 
+/**
+ * Devanagari (०-९) and Gujarati (૦-૯) digits become 0-9, so the figure check sees
+ * every number and the owner sees the same digits as on bills and reports.
+ */
+export function toAsciiDigits(text: string): string {
+  return text.replace(/[\u0966-\u096f\u0ae6-\u0aef]/g, (d) => {
+    const c = d.charCodeAt(0);
+    return String(c - (c >= 0x0ae6 ? 0x0ae6 : 0x0966));
+  });
+}
+
 /** Remove anything that could carry data out or render as markup. */
 export function sanitizeReply(text: string): string {
-  return text
+  return toAsciiDigits(text)
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
     .replace(/\b(?:https?:\/\/|www\.)\S+/gi, '[link removed]')

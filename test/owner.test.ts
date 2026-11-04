@@ -119,6 +119,11 @@ describe('reply checks', () => {
   it('flags figures no report contains, and lakh/crore figures for checking', () => {
     expect(unverifiedFigures('Revenue was ₹15,000, up 40%, nearly ₹1 crore.', facts)).toEqual(['₹15,000', '₹1 crore', '40%']);
   });
+  it('turns Hindi and Gujarati digits into 0-9 so the figure check sees them', () => {
+    const reply = sanitizeReply('આજની આવક ₹૯,૯૯૯ છે, आज ₹६५१');
+    expect(reply).toBe('આજની આવક ₹9,999 છે, आज ₹651');
+    expect(unverifiedFigures(reply, facts)).toEqual(['₹9,999', '₹651']);
+  });
   it('strips links, images and markup from the answer', () => {
     const out = sanitizeReply('**Revenue** up. See [report](http://evil.example/x?d=1) ![a](http://e/x.png) www.bad.example <img src=x>');
     expect(out).not.toMatch(/http|www\.|<img|\*\*|\]\(/);
