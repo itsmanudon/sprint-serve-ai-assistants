@@ -17,25 +17,40 @@
   .meta { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
   .ticket ul { margin: 0; padding-left: 18px; }
   .empty { color: var(--muted); padding: 32px 16px; }
+  .ticket.PREPARING { border-top-color: #4aa3df; } .ticket.READY { border-top-color: #4cc38a; }
+  .ticket button { margin-top: 10px; font: inherit; border-radius: 8px; border: 1px solid var(--line); background: #2a2a2a; color: var(--ink); padding: 6px 10px; cursor: pointer; }
+  .ticket button.go { background: var(--new); color: #111; border-color: var(--new); font-weight: 600; }
+  .src { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: #333; margin-left: 6px; }
 </style>
 </head>
 <body>
-<header><h1>Kitchen board</h1><span>Demo: orders placed from the meal assistant appear here</span></header>
+<header><h1>Kitchen board</h1><span>Open orders, oldest first · completed orders count in the owner's reports</span></header>
 <div class="grid" id="grid"></div>
 <div class="empty" id="empty">No orders yet.</div>
 <script>
+const NEXT = { NEW: ['PREPARING', 'Start'], PREPARING: ['READY', 'Ready'], READY: ['COMPLETED', 'Picked up'] };
+async function move(id, status) {
+  await fetch(`/api/kitchen/${id}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+  refresh();
+}
 async function refresh() {
   const orders = await fetch('/api/kitchen').then((r) => r.json()).catch(() => []);
   const grid = document.getElementById('grid');
   document.getElementById('empty').hidden = orders.length > 0;
   grid.replaceChildren(...orders.map((o) => {
-    const t = document.createElement('div'); t.className = 'ticket';
+    const t = document.createElement('div'); t.className = `ticket ${o.status}`;
     const h = document.createElement('h2'); h.textContent = `#${o.number} · ${o.name}`;
+    if (o.source === 'assistant') { const s = document.createElement('span'); s.className = 'src'; s.textContent = 'assistant'; h.append(s); }
     const m = document.createElement('div'); m.className = 'meta';
-    m.textContent = `${new Date(o.placedAt).toLocaleTimeString()} · ₹${o.total}`;
+    const mins = Math.round((Date.now() - Date.parse(o.placedAt)) / 60000);
+    m.textContent = `${o.status} · ${mins} min ago · ₹${Number(o.total).toFixed(2).replace(/\.00$/, '')}`;
     const ul = document.createElement('ul');
-    for (const l of o.lines) { const li = document.createElement('li'); li.textContent = `${l.quantity} × ${l.name}`; ul.append(li); }
-    t.append(h, m, ul); return t;
+    for (const l of o.lines) { const li = document.createElement('li'); li.textContent = `${l.quantity} × ${l.name}${l.variantName ? ` (${l.variantName})` : ''}`; ul.append(li); }
+    t.append(h, m, ul);
+    const [next, label] = NEXT[o.status];
+    const go = document.createElement('button'); go.className = 'go'; go.textContent = label; go.onclick = () => move(o.id, next); t.append(go);
+    if (o.status === 'NEW') { const c = document.createElement('button'); c.textContent = 'Cancel'; c.style.marginLeft = '6px'; c.onclick = () => move(o.id, 'CANCELLED'); t.append(c); }
+    return t;
   }));
 }
 refresh(); setInterval(refresh, 2000);

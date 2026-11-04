@@ -1,27 +1,28 @@
 {
-  "name": "sprint-serve-meal-assistant",
+  "name": "sprint-serve-ai-assistants",
   "version": "0.1.0",
   "private": true,
-  "description": "Help-me-choose meal assistant for restaurant takeaway, powered by Meta Muse Spark. Extracted from Sprint Serve to prototype and demo standalone.",
-  "license": "MIT",
+  "description": "Guest \"help me choose\" and owner business assistants for a restaurant, powered by Meta Muse Spark, extracted from Sprint Serve to prototype and demo standalone.",
+  "license": "Apache-2.0",
   "type": "commonjs",
   "engines": {
-    "node": ">=20.12"
+    "node": ">=22.13"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
+    "dev": "tsx watch --disable-warning=ExperimentalWarning src/server.ts",
+    "start": "tsx --disable-warning=ExperimentalWarning src/server.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "eval": "node scripts/assistant-eval.mjs",
     "stub": "node scripts/assistant-model-stub.mjs",
-    "eval:adversarial": "node scripts/make-adversarial-data.mjs"
+    "eval:adversarial": "node scripts/make-adversarial-data.mjs",
+    "db:reset": "tsx --disable-warning=ExperimentalWarning src/db/reset.ts"
   },
   "dependencies": {
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@types/node": "20.19.37",
+    "@types/node": "22.20.3",
     "tsx": "4.19.4",
     "typescript": "5.9.3",
     "vitest": "3.2.6"

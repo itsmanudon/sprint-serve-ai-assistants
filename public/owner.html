@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Owner dashboard — Sprint Serve demo</title>
+<style>
+  :root { --bg: #f6f5f2; --card: #fff; --ink: #1b1a17; --muted: #6b665e; --line: #e4e0d8; --brand: #2f5d8a; --brand-ink: #fff; --soft: #eef3f8; --ok: #2f7d4f; --warn: #a3471f; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121417; --card: #1b1e22; --ink: #eef0f2; --muted: #9aa1a9; --line: #2c3137; --brand: #7fb0e0; --brand-ink: #0d1520; --soft: #1f2a36; --ok: #6cc28f; --warn: #f08a5d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { max-width: 1040px; margin: 0 auto; padding: 18px 16px 6px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+  header h1 { font-size: 19px; margin: 0; }
+  nav { display: flex; gap: 6px; }
+  nav button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: inherit; cursor: pointer; }
+  nav button[aria-selected="true"] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+  main { max-width: 1040px; margin: 0 auto; padding: 8px 16px 40px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0 18px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .kpi .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .kpi .v { font-size: 24px; font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .s { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .up { color: var(--ok); } .down { color: var(--warn); }
+  .layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 1.4fr 1fr; } }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .panel h2 { font-size: 16px; margin: 0 0 10px; }
+  .suggest { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .suggest button { border: 1px solid var(--line); background: var(--soft); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .thread { display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
+  .bubble { max-width: 92%; padding: 10px 13px; border-radius: 14px; white-space: pre-wrap; }
+  .me { align-self: flex-end; background: var(--brand); color: var(--brand-ink); }
+  .ai { align-self: flex-start; background: var(--soft); }
+  .typing { color: var(--muted); font-style: italic; }
+  details { margin-top: 6px; font-size: 13px; color: var(--muted); }
+  details pre { white-space: pre-wrap; background: var(--bg); border-radius: 8px; padding: 8px; max-height: 220px; overflow: auto; color: var(--ink); }
+  .warn-note { color: var(--warn); font-size: 13px; margin-top: 6px; }
+  .composer { display: flex; gap: 8px; margin-top: 12px; }
+  .composer input { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .composer button { border-radius: 999px; border: 0; background: var(--brand); color: var(--brand-ink); font: inherit; font-weight: 600; padding: 8px 16px; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--soft); }
+  .pill.late { background: var(--warn); color: #fff; }
+  .switch { cursor: pointer; }
+  .muted { color: var(--muted); font-size: 13px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Owner dashboard</h1>
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-tab="today">Today</button>
+    <button role="tab" aria-selected="false" data-tab="menu">Menu</button>
+  </nav>
+</header>
+<main>
+  <section id="tab-today">
+    <div class="kpis" id="kpis"></div>
+    <div class="layout">
+      <div class="panel">
+        <h2>Ask about your restaurant</h2>
+        <div class="suggest" id="suggest"></div>
+        <div class="thread" id="thread"><div class="muted">Answers come only from your own orders. Each answer shows the figures it used.</div></div>
+        <div class="composer"><input id="q" maxlength="500" placeholder="e.g. Which dishes are not selling this month?" /><button id="ask">Ask</button></div>
+      </div>
+      <div class="panel">
+        <h2>Open orders</h2>
+        <div id="open"></div>
+        <h2 style="margin-top:18px">Best sellers, last 7 days</h2>
+        <div id="top"></div>
+      </div>
+    </div>
+  </section>
+  <section id="tab-menu" hidden>
+    <div class="panel">
+      <h2>Menu availability</h2>
+      <p class="muted">Turn a dish off and the meal assistant stops suggesting it immediately; checkout refuses it too.</p>
+      <table><thead><tr><th>Dish</th><th>Category</th><th class="num">Price</th><th>Available</th></tr></thead><tbody id="menu"></tbody></table>
+    </div>
+  </section>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const inr = (n) => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const history = [];
+const SUGGESTED = [
+  'How are we doing today compared with yesterday?',
+  'How did this week go compared with last week?',
+  'What are my top 5 dishes this month?',
+  'Which dishes are not selling in the last 30 days?',
+  'Are any orders stuck right now?',
+  'When are my busiest hours?',
+  'How is Dal Makhani selling this week?',
+];
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === 'class' ? (n.className = v) : n.setAttribute(k, v);
+  for (const k of kids) if (k !== null && k !== undefined) n.append(k);
+  return n;
+}
+const delta = (p, prev) => (p === null || p === undefined ? `no sales ${prev} to compare with` : `${p >= 0 ? '▲' : '▼'} ${Math.abs(p)}% vs ${prev}`);
+
+async function loadOverview() {
+  const [status, ov] = await Promise.all([fetch('/api/status').then((r) => r.json()), fetch('/api/owner/overview').then((r) => r.json())]);
+  $('#title').textContent = `${status.restaurant} · Owner`;
+  const [today, week, open, top] = ov.facts.map((f) => f.data);
+  const kpi = (k, v, s, cls = '') => el('div', { class: 'kpi' }, el('div', { class: 'k' }, k), el('div', { class: 'v' }, v), el('div', { class: `s ${cls}` }, s));
+  $('#kpis').replaceChildren(
+    kpi('Revenue today', inr(today.current.revenue), delta(today.changePercent.revenue, today.comparedWith), today.changePercent.revenue >= 0 ? 'up' : 'down'),
+    kpi('Orders today', String(today.current.orders), `${today.current.cancelledOrders} cancelled · ${today.current.assistantOrders} via assistant`),
+    kpi('This week', inr(week.current.revenue), delta(week.changePercent.revenue, week.comparedWith), week.changePercent.revenue >= 0 ? 'up' : 'down'),
+    kpi('Open orders', String(open.open), open.overdue ? `${open.overdue} overdue` : 'none overdue', open.overdue ? 'down' : 'up'),
+  );
+  $('#open').replaceChildren(open.orders.length
+    ? el('table', {}, el('tbody', {}, ...open.orders.map((o) => el('tr', {},
+        el('td', {}, `#${o.number}`), el('td', {}, el('span', { class: 'pill' + (o.overdue ? ' late' : '') }, o.status)),
+        el('td', { class: 'num' }, `${o.minutesInStatus} min`), el('td', { class: 'num' }, `${o.items} items`)))))
+    : el('div', { class: 'muted' }, 'Nothing open.'));
+  $('#top').replaceChildren(el('table', {}, el('tbody', {}, ...top.dishes.map((d) => el('tr', {},
+    el('td', {}, d.dish), el('td', { class: 'num' }, `${d.quantity} sold`), el('td', { class: 'num' }, inr(d.revenue)))))));
+}
+
+async function ask(text) {
+  const thread = $('#thread');
+  if (history.length === 0) thread.replaceChildren();
+  thread.append(el('div', { class: 'bubble me' }, text));
+  history.push({ role: 'user', content: text });
+  const typing = el('div', { class: 'bubble ai typing' }, 'Checking your numbers…');
+  thread.append(typing); thread.scrollTop = thread.scrollHeight;
+  $('#ask').disabled = true;
+  try {
+    const res = await fetch('/api/owner/turn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history.slice(-12) }) });
+    const data = await res.json();
+    typing.remove();
+    if (!res.ok) throw new Error(data.error || 'The assistant is unavailable.');
+    history.push({ role: 'assistant', content: data.reply });
+    const bubble = el('div', { class: 'bubble ai' }, data.reply);
+    if (data.unverifiedFigures?.length) bubble.append(el('div', { class: 'warn-note' }, `Check: ${data.unverifiedFigures.join(', ')} not found in the reports used.`));
+    if (data.facts?.length) {
+      const d = el('details', {}, el('summary', {}, `Figures used (${data.facts.map((f) => f.title).join('; ')})`));
+      d.append(el('pre', {}, JSON.stringify(data.facts.map((f) => f.data), null, 2)));
+      bubble.append(d);
+    }
+    thread.append(bubble);
+  } catch (err) {
+    typing.remove();
+    history.pop();
+    thread.append(el('div', { class: 'bubble ai warn-note' }, err.message));
+  } finally {
+    $('#ask').disabled = false; thread.scrollTop = thread.scrollHeight;
+  }
+}
+
+async function loadMenu() {
+  const items = await fetch('/api/owner/menu').then((r) => r.json());
+  $('#menu').replaceChildren(...items.map((i) => {
+    const box = el('input', { type: 'checkbox', class: 'switch', 'aria-label': `${i.name} available` });
+    box.checked = i.isAvailable;
+    box.onchange = async () => {
+      const res = await fetch(`/api/owner/menu/${i.id}/availability`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ available: box.checked }) });
+      if (!res.ok) box.checked = !box.checked;
+    };
+    return el('tr', {}, el('td', {}, `${i.isVeg ? '🟢' : '🔴'} ${i.name}`), el('td', {}, i.category), el('td', { class: 'num' }, inr(i.price)), el('td', {}, box));
+  }));
+}
+
+for (const s of SUGGESTED) { const b = el('button', {}, s); b.onclick = () => ask(s); $('#suggest').append(b); }
+$('#ask').onclick = () => { const t = $('#q').value.trim(); if (t) { $('#q').value = ''; ask(t); } };
+$('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#ask').click(); });
+document.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+  $('#tab-today').hidden = b.dataset.tab !== 'today';
+  $('#tab-menu').hidden = b.dataset.tab !== 'menu';
+  if (b.dataset.tab === 'menu') loadMenu();
+});
+loadOverview(); setInterval(loadOverview, 15000);
+</script>
+</body>
+</html>

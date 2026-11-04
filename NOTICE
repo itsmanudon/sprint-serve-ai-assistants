@@ -1,0 +1,17 @@
+Sprint Serve meal assistant
+Copyright 2026 Manan Jariwala and Sprint Serve
+
+This repository is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Scope: the license covers only the files in this repository. It does not cover
+Sprint Serve, the restaurant management platform this assistant was extracted
+from, which is proprietary, closed-source software. No rights to Sprint Serve's
+other source code, services, data or documentation are granted by this
+repository, and nothing here is an offer to license them.
+
+"Sprint Serve" and its logo are trade names of the Sprint Serve team. As stated
+in section 6 of the Apache License, the license does not grant permission to
+use them, except as needed to describe where this code comes from.
+
+data/demo-restaurant.json and the generated demo database contain synthetic
+data only: no real restaurant's menu, sales or customer information.

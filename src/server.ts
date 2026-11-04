@@ -1,37 +1,31 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { z } from 'zod';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { runWithTenantId } from './config/tenant-context';
-import { isAssistantConfigured as assistantEnabled } from './modules/assistant/core/model';
+import { DEMO_RESTAURANT_ID, getDb } from './db/database';
+import { isAssistantConfigured } from './modules/assistant/core/model';
 import { customerOptions, customerTurn } from './modules/assistant/customer/customer.service';
 import { cartLineSchema, customerTurnSchema } from './modules/assistant/customer/customer.types';
-import { demoRestaurant } from './modules/menu/demo-data';
-import { quoteTakeawayOrder } from './modules/takeaway/takeaway.service';
+import { ownerOverview, ownerTurn } from './modules/assistant/owner/owner.service';
+import { ownerTurnSchema } from './modules/assistant/owner/owner.types';
+import { getMenuForCustomer, getMenuForOwner, setItemAvailability } from './modules/menu/menu.service';
+import { findRestaurant } from './modules/menu/menu.repository';
+import { openOrders, placeOrder, setStatus } from './modules/orders/orders.service';
 
 /**
- * A tiny local server around the meal assistant: the guest page, the two
- * assistant routes, and a pretend checkout + kitchen board so the whole loop
- * (ask → proposal → edit → order → kitchen) can be shown without Sprint Serve.
+ * A small local server around the assistant, backed by one SQLite file:
+ * - /         guest takeaway page with "Help me choose"
+ * - /kitchen  kitchen board (advance orders; completed orders feed the reports)
+ * - /owner    owner dashboard with the owner's assistant and menu availability
+ * There is no login: in Sprint Serve the owner side is OWNER-only and the guest
+ * side sits behind the restaurant's gate, rate limits and checkout OTP.
  */
 
 const MAX_BODY = 64 * 1024;
 const publicDir = resolve(process.cwd(), 'public');
-
-interface KitchenOrder {
-  id: string;
-  number: number;
-  name: string;
-  lines: Awaited<ReturnType<typeof quoteTakeawayOrder>>['lines'];
-  total: number;
-  placedAt: string;
-}
-const kitchen: KitchenOrder[] = [];
-// Retries with the same key return the same order, like Sprint Serve's idempotent checkout.
-const placedByKey = new Map<string, KitchenOrder>();
 
 const checkoutSchema = z.object({
   name: z.string().trim().min(1).max(60).default('Guest'),
@@ -39,6 +33,8 @@ const checkoutSchema = z.object({
   /** The total the guest saw; refused if the menu changed underneath it. */
   quotedTotal: z.number().nonnegative(),
 });
+const statusSchema = z.object({ status: z.enum(['PREPARING', 'READY', 'COMPLETED', 'CANCELLED']) });
+const availabilitySchema = z.object({ available: z.boolean() });
 
 const send = (res: ServerResponse, status: number, body: unknown) => {
   res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -60,84 +56,89 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   }
 }
 
-async function serveStatic(res: ServerResponse, name: string, type: string) {
-  const body = await readFile(resolve(publicDir, name));
-  res.writeHead(200, { 'Content-Type': type });
-  res.end(body);
-}
+const parse = <T>(schema: z.ZodType<T>, body: unknown): T => {
+  const r = schema.safeParse(body);
+  if (!r.success) throw Object.assign(new Error('Invalid request.'), { status: 400 });
+  return r.data;
+};
+
+const PAGES: Record<string, string> = { '/': 'index.html', '/kitchen': 'kitchen.html', '/owner': 'owner.html' };
+const notConfigured = 'The assistant is off: set ASSISTANT_ENABLED=true and ASSISTANT_MODEL_API_KEY in .env (or run the model stub).';
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', 'http://localhost');
-  const route = `${req.method} ${url.pathname}`;
-  switch (route) {
-    case 'GET /':
-      return serveStatic(res, 'index.html', 'text/html; charset=utf-8');
-    case 'GET /kitchen':
-      return serveStatic(res, 'kitchen.html', 'text/html; charset=utf-8');
+  const path = url.pathname;
+  if (req.method === 'GET' && PAGES[path]) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(await readFile(resolve(publicDir, PAGES[path])));
+  }
+
+  // Kitchen status and menu availability carry an id in the path.
+  const statusMatch = path.match(/^\/api\/kitchen\/([\w-]+)\/status$/);
+  if (req.method === 'POST' && statusMatch)
+    return send(res, 200, await setStatus(statusMatch[1], parse(statusSchema, await readJson(req)).status));
+  const availMatch = path.match(/^\/api\/owner\/menu\/([\w-]+)\/availability$/);
+  if (req.method === 'POST' && availMatch)
+    return send(res, 200, await setItemAvailability(availMatch[1], parse(availabilitySchema, await readJson(req)).available));
+
+  switch (`${req.method} ${path}`) {
     case 'GET /api/status':
       return send(res, 200, {
-        enabled: assistantEnabled(),
-        restaurant: demoRestaurant().name,
+        enabled: isAssistantConfigured(),
+        restaurant: findRestaurant()?.name ?? 'Demo restaurant',
         model: env.ASSISTANT_MODEL,
       });
     case 'GET /api/options':
-      return send(res, 200, assistantEnabled() ? await customerOptions() : { popularHere: false, readyFast: false });
-    case 'POST /api/turn': {
-      if (!assistantEnabled())
-        return send(res, 503, { error: 'Set ASSISTANT_ENABLED=true and ASSISTANT_MODEL_API_KEY in .env.' });
-      const parsed = customerTurnSchema.safeParse(await readJson(req));
-      if (!parsed.success) return send(res, 400, { error: 'Invalid request.', issues: parsed.error.issues });
-      return send(res, 200, await customerTurn(parsed.data));
-    }
+      return send(res, 200, isAssistantConfigured() ? await customerOptions() : { popularHere: false, readyFast: false });
+    case 'POST /api/turn':
+      if (!isAssistantConfigured()) return send(res, 503, { error: notConfigured });
+      return send(res, 200, await customerTurn(parse(customerTurnSchema, await readJson(req))));
     case 'POST /api/checkout': {
       const key = String(req.headers['x-idempotency-key'] ?? '');
       if (!/^[A-Za-z0-9-]{8,80}$/.test(key)) return send(res, 400, { error: 'X-Idempotency-Key is required.' });
-      const previous = placedByKey.get(key);
-      if (previous) return send(res, 200, previous);
-      const parsed = checkoutSchema.safeParse(await readJson(req));
-      if (!parsed.success) return send(res, 400, { error: 'Invalid order.', issues: parsed.error.issues });
-      const quote = await quoteTakeawayOrder(parsed.data.items);
-      if (Math.abs(quote.total - parsed.data.quotedTotal) > 0.005)
-        return send(res, 409, { error: 'The price changed. Please review your order.', code: 'QUOTE_TOTAL_CHANGED', total: quote.total });
-      const order: KitchenOrder = {
-        id: randomUUID(),
-        number: kitchen.length + 1,
-        name: parsed.data.name,
-        lines: quote.lines,
-        total: quote.total,
-        placedAt: new Date().toISOString(),
-      };
-      kitchen.unshift(order);
-      placedByKey.set(key, order);
-      return send(res, 201, order);
-    }
-    // Same paths and envelope as Sprint Serve, so scripts/assistant-eval.mjs runs unchanged.
-    case 'GET /api/v1/menu/customer':
-      return send(res, 200, { success: true, data: demoRestaurant().categories });
-    case 'POST /api/v1/assistant/customer/turn': {
-      if (!assistantEnabled()) return send(res, 404, { success: false, code: 'ASSISTANT_DISABLED' });
-      const parsed = customerTurnSchema.safeParse(await readJson(req));
-      if (!parsed.success) return send(res, 400, { success: false, issues: parsed.error.issues });
-      return send(res, 200, { success: true, data: await customerTurn(parsed.data) });
+      const body = parse(checkoutSchema, await readJson(req));
+      const { order, created } = await placeOrder({ ...body, idempotencyKey: key });
+      return send(res, created ? 201 : 200, order);
     }
     case 'GET /api/kitchen':
-      return send(res, 200, kitchen.slice(0, 50));
+      return send(res, 200, await openOrders());
+    case 'GET /api/owner/overview':
+      return send(res, 200, ownerOverview());
+    case 'GET /api/owner/menu':
+      return send(res, 200, await getMenuForOwner());
+    case 'POST /api/owner/turn':
+      if (!isAssistantConfigured()) return send(res, 503, { error: notConfigured });
+      return send(res, 200, await ownerTurn(parse(ownerTurnSchema, await readJson(req))));
+
+    // Same paths and envelope as Sprint Serve, so scripts/assistant-eval.mjs runs unchanged.
+    case 'GET /api/v1/menu/customer':
+      return send(res, 200, { success: true, data: await getMenuForCustomer() });
+    case 'POST /api/v1/assistant/customer/turn':
+      if (!isAssistantConfigured()) return send(res, 404, { success: false, code: 'ASSISTANT_DISABLED' });
+      return send(res, 200, { success: true, data: await customerTurn(parse(customerTurnSchema, await readJson(req))) });
     default:
       return send(res, 404, { error: 'Not found.' });
   }
 }
 
+getDb(); // create and seed on first start, before the first request
+
 const server = createServer((req, res) => {
-  runWithTenantId(demoRestaurant().id, () =>
-    handle(req, res).catch((err: { status?: number; message?: string }) => {
+  runWithTenantId(DEMO_RESTAURANT_ID, () =>
+    handle(req, res).catch((err: { status?: number; message?: string; code?: string; total?: number }) => {
       const status = err.status && err.status < 600 ? err.status : 500;
       if (status >= 500) logger.error('request failed', { error: err.message });
-      send(res, status, { error: status >= 500 ? 'Something went wrong.' : err.message });
+      send(res, status, {
+        error: status >= 500 ? 'Something went wrong.' : err.message,
+        ...(err.code && { code: err.code }),
+        ...(err.total !== undefined && { total: err.total }),
+      });
     })
   );
 });
 
 server.listen(env.PORT, () => {
-  console.log(`Meal assistant demo on http://localhost:${env.PORT}  (kitchen board: /kitchen)`);
-  if (!assistantEnabled()) console.log('Assistant is OFF: set ASSISTANT_ENABLED=true and ASSISTANT_MODEL_API_KEY in .env');
+  console.log(`Meal assistant demo on http://localhost:${env.PORT}`);
+  console.log(`  guest: /   kitchen board: /kitchen   owner dashboard: /owner`);
+  if (!isAssistantConfigured()) console.log(`  ${notConfigured}`);
 });

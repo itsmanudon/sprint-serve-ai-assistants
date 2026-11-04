@@ -1,5 +1,5 @@
 import { getCurrentTenantId } from '../../../config/tenant-context';
-import { demoRestaurant } from '../../menu/demo-data';
+import { findRestaurant } from '../../menu/menu.repository';
 
 export interface ProfileSource {
   name: string | null;
@@ -7,12 +7,12 @@ export interface ProfileSource {
 }
 
 /**
- * The restaurant's name and owner-written chef notes. In Sprint Serve these
- * are tenant-scoped database reads; here they come from the demo file.
- * No tenant, no data.
+ * The current restaurant's name and owner-written chef notes, keyed on the
+ * request's restaurant. No tenant, no data. (Sprint Serve: Prisma, tenant-scoped.)
  */
 export async function findProfileSource(): Promise<ProfileSource> {
-  if (!getCurrentTenantId()) return { name: null, chefNotes: null };
-  const r = demoRestaurant();
-  return { name: r.name, chefNotes: r.chefNotes };
+  const restaurantId = getCurrentTenantId();
+  if (!restaurantId) return { name: null, chefNotes: null };
+  const r = findRestaurant(restaurantId);
+  return { name: r?.name ?? null, chefNotes: r?.chef_notes ?? null };
 }

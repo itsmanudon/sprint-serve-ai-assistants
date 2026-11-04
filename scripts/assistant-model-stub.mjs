@@ -33,6 +33,37 @@ const parseJson = (text, fallback) => {
   }
 };
 
+// Owner side (added in the standalone repo): pick one report from keywords, then answer
+// with figures copied from the tool result, so the dashboard can be exercised without a key.
+function ownerReply(messages) {
+  const last = [...messages].reverse().find((m) => m.role === 'user')?.content.toLowerCase() ?? '';
+  const tool = [...messages].reverse().find((m) => m.role === 'tool');
+  if (!tool) {
+    const period = /today/.test(last) ? 'today' : /week/.test(last) ? 'this_week' : /month|30/.test(last) ? 'last_30_days' : 'last_7_days';
+    const call = /stuck|open|attention|overdue|waiting/.test(last)
+      ? ['orders_needing_attention', {}]
+      : /hour|busy|peak/.test(last)
+        ? ['busy_hours', { period }]
+        : /not selling|slow|worst|bottom/.test(last)
+          ? ['dish_ranking', { period, order: 'bottom', limit: 5 }]
+          : /top|best|popular/.test(last)
+            ? ['dish_ranking', { period, order: 'top', limit: 5 }]
+            : /categor/.test(last)
+              ? ['category_sales', { period }]
+              : ['sales_summary', { period }];
+    return { content: null, tool_calls: [{ id: `call_${++callSeq}`, type: 'function', function: { name: call[0], arguments: JSON.stringify(call[1]) } }] };
+  }
+  const d = JSON.parse(tool.content);
+  const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
+  let text = 'Here is what the report shows.';
+  if (d.current) text = `${d.period}: ${d.current.orders} orders and ${inr(d.current.revenue)} revenue, compared with ${d.previous.orders} orders and ${inr(d.previous.revenue)} for ${d.comparedWith}.`;
+  else if (d.dishes) text = `${d.order === 'bottom' ? 'Slowest' : 'Top'} dishes (${d.period}): ${d.dishes.map((x) => `${x.dish} (${x.quantity})`).join(', ')}.`;
+  else if (d.hours) text = `Busiest hours (${d.period}): ${d.hours.slice(0, 3).map((h) => `${h.hour} with ${h.orders} orders`).join('; ')}.`;
+  else if (d.categories) text = `Top categories (${d.period}): ${d.categories.slice(0, 3).map((c) => `${c.category} ${inr(c.revenue)}`).join(', ')}.`;
+  else if ('overdue' in d) text = d.open ? `${d.open} open orders, ${d.overdue} overdue: ${d.orders.filter((o) => o.overdue).map((o) => `#${o.number} (${o.status}, ${o.minutesInStatus} min)`).join(', ') || 'none'}.` : 'No open orders right now.';
+  return { content: text };
+}
+
 function readContext(system) {
   const limits = parseJson(system.match(/Limits agreed so far: (\{.*?\})\.(?:\n|$)/)?.[1] ?? '{}', {});
   const remaining = system.match(/Remaining budget: ₹([\d.]+)/)?.[1];
@@ -122,6 +153,7 @@ function chooseLines(items, { people, budget, cheaper }) {
 
 function respond(messages) {
   const system = messages[0]?.content ?? '';
+  if (system.startsWith('You are the business assistant for the owner')) return ownerReply(messages);
   const ctx = readContext(system);
   const lastUser = messages.map((m) => m.role).lastIndexOf('user');
   const ask = (messages[lastUser]?.content ?? '').toLowerCase();

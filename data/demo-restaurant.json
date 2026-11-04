@@ -1,74 +1,8 @@
 {
   "id": "demo-restaurant",
   "name": "Sprint Serve's Official Restaurant (For Demo)",
-  "note": "Synthetic demo data. Menu copied from the Sprint Serve dev seed; sales counts are invented for the demo.",
+  "note": "Synthetic demo data. The menu is copied from Sprint Serve's development seed. \"popularity\" only weights the generated order history; it is not real sales.",
   "chefNotes": "We cook North Indian food home-style and keep it mild unless a guest asks for heat. Our signature is the Dal Makhani; we like to serve it with Butter Naan. For a group, we suggest one main per two people plus breads.",
-  "orderingOpen": true,
-  "sales": {
-    "completedOrders30d": 142,
-    "sold": [
-      {
-        "menuItemId": "dal-makhani",
-        "quantity": 96
-      },
-      {
-        "menuItemId": "butter-naan",
-        "quantity": 180
-      },
-      {
-        "menuItemId": "butter-chicken",
-        "quantity": 88
-      },
-      {
-        "menuItemId": "garlic-naan",
-        "quantity": 120
-      },
-      {
-        "menuItemId": "paneer-tikka",
-        "quantity": 64
-      },
-      {
-        "menuItemId": "veg-biryani",
-        "quantity": 52
-      },
-      {
-        "menuItemId": "chicken-biryani",
-        "quantity": 58
-      },
-      {
-        "menuItemId": "mango-lassi",
-        "quantity": 70
-      },
-      {
-        "menuItemId": "gulab-jamun",
-        "quantity": 40
-      },
-      {
-        "menuItemId": "chole-kulcha",
-        "quantity": 35
-      },
-      {
-        "menuItemId": "margherita-pizza",
-        "quantity": 30
-      },
-      {
-        "menuItemId": "jeera-rice",
-        "quantity": 44
-      },
-      {
-        "menuItemId": "masala-chai",
-        "quantity": 50
-      },
-      {
-        "menuItemId": "virgin-mojito",
-        "quantity": 22
-      },
-      {
-        "menuItemId": "chocolate-milkshake",
-        "quantity": 18
-      }
-    ]
-  },
   "categories": [
     {
       "id": "starters",
@@ -1943,5 +1877,22 @@
         }
       ]
     }
-  ]
+  ],
+  "popularity": {
+    "dal-makhani": 9.6,
+    "butter-naan": 18.0,
+    "butter-chicken": 8.8,
+    "garlic-naan": 12.0,
+    "paneer-tikka": 6.4,
+    "veg-biryani": 5.2,
+    "chicken-biryani": 5.8,
+    "mango-lassi": 7.0,
+    "gulab-jamun": 4.0,
+    "chole-kulcha": 3.5,
+    "margherita-pizza": 3.0,
+    "jeera-rice": 4.4,
+    "masala-chai": 5.0,
+    "virgin-mojito": 2.2,
+    "chocolate-milkshake": 1.8
+  }
 }
