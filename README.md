@@ -1,5 +1,7 @@
 # Sprint Serve AI assistants
 
+> **Demo video:** https://youtu.be/pAiHJ3sxydg (2:58, Meta AI Developer Hackathon)
+
 Two assistants for a restaurant, both powered by **Meta Muse Spark** through the Meta Model API. Both are grounded in that restaurant's own data, and the server checks everything the model says before anyone sees it.
 
 - **Guest: "Help me choose".** A takeaway guest says who's eating, any diet limits and a budget. The model, acting as the restaurant's chef, builds a real meal from the menu. Every proposal is validated and priced by the server, and only then can the guest order it.
