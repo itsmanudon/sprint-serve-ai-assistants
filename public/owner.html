@@ -169,7 +169,7 @@ async function ask(text) {
     if (!res.ok) throw new Error(data.error || 'The assistant is unavailable.');
     history.push({ role: 'assistant', content: data.reply });
     const bubble = el('div', { class: 'bubble ai' });
-    bubble.append(el('div', { class: 'tier' }, data.depth === 'deep' ? `Deep analysis · ${data.answeredBy.model}` : `Quick answer · ${data.answeredBy.model}`));
+    bubble.append(el('div', { class: 'tier' }, data.answeredBy.tier === 'deep' ? `Deep analysis · ${data.answeredBy.model}` : `Quick answer · ${data.answeredBy.model}`));
     bubble.append(el('div', {}, data.reply));
     const u = data.debug?.usage;
     bubble.append(el('div', { class: 'meta-line' }, `${((performance.now() - started) / 1000).toFixed(1)} s${u ? ` · ${u.modelCalls} model calls · ${u.inputTokens + u.outputTokens} tokens` : ''} · ${data.facts.length} report${data.facts.length === 1 ? '' : 's'} · ${data.unverifiedFigures?.length ? 'figures need checking' : 'all figures checked ✓'}`));

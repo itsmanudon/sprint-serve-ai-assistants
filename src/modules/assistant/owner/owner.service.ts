@@ -75,7 +75,9 @@ export function tierOptions(depth: Depth): CallOptions & { model: string } {
         reasoningEffort: env.ASSISTANT_DEEP_REASONING_EFFORT,
         baseUrl: env.ASSISTANT_DEEP_BASE_URL,
         apiKey: env.ASSISTANT_DEEP_API_KEY,
-        maxTokens: 2500,
+        // Reasoning tokens count against this cap. On muse-spark-1.3 at "high" effort the
+        // morning briefing reasoned for ~3,300 tokens, so 2,500 left no room for the answer.
+        maxTokens: 6000,
         timeoutMs: env.ASSISTANT_DEEP_TIMEOUT_MS,
       }
     : { model: env.ASSISTANT_FAST_MODEL ?? env.ASSISTANT_MODEL, reasoningEffort: env.ASSISTANT_FAST_REASONING_EFFORT };
@@ -148,7 +150,9 @@ export function unverifiedFigures(reply: string, facts: OwnerFact[]): string[] {
     // "₹1.2 lakh" style figures cannot be matched exactly: always flag them for checking.
     if (m[2] || !known.some((k) => Math.abs(Math.abs(k) - v) <= 1)) misses.push(m[0].trim());
   }
-  for (const m of reply.matchAll(/(-?\d+(?:\.\d+)?)\s?%/g)) {
+  // "%" and the spelled-out word in English, Hindi and Gujarati, so "15.7 percent" or
+  // "15.7 ટકા" cannot slip past the check that "15.7%" gets.
+  for (const m of reply.matchAll(/(-?\d+(?:\.\d+)?)\s?(?:%|per\s?cent\b|प्रतिशत|फ़ीसदी|फीसदी|ટકા)/gi)) {
     const v = Math.abs(Number(m[1]));
     if (!known.some((k) => Math.abs(Math.abs(k) - v) <= 0.6)) misses.push(m[0].trim());
   }
@@ -231,7 +235,8 @@ export async function ownerTurn(
     depth = planned.result;
 
     // 2. WRITE (no tools; reports as data in the final message)
-    const tier = tierOptions(depth);
+    let tier = tierOptions(depth);
+    let answeredTier: 'fast' | 'deep' = depth === 'deep' ? 'deep' : 'fast';
     const reports = JSON.stringify(facts.map((f) => ({ report: f.title, data: f.data })));
     const writerMessages: ChatMessage[] = [
       { role: 'system', content: writerPrompt(name, localNow, depth) },
@@ -243,7 +248,22 @@ export async function ownerTurn(
       Object.assign(usage, addCall(usage, turnUsage(turn)));
       return turn.finishReason === 'length' ? '' : sanitizeReply(turn.message.content ?? '');
     };
-    let reply = await write(writerMessages);
+    let reply =
+      depth === 'deep'
+        ? await write(writerMessages).catch((err) => {
+            reportSwallowed('assistant', 'owner_deep_write')(err);
+            return '';
+          })
+        : await write(writerMessages);
+    if (!reply && depth === 'deep') {
+      // The deep tier can spend its whole token cap reasoning (finish_reason "length") or
+      // time out. Rather than leave the owner with nothing, the fast tier writes from the
+      // same reports, and the same figure check still runs on what it writes.
+      logger.warn('assistant.owner.deep_fallback', { restaurantId });
+      tier = tierOptions('quick');
+      answeredTier = 'fast';
+      reply = await write(writerMessages);
+    }
     let misses = unverifiedFigures(reply, facts);
 
     // 3. CHECK: one rewrite when figures do not match the reports.
@@ -268,7 +288,7 @@ export async function ownerTurn(
       depth,
       facts,
       unverifiedFigures: misses,
-      answeredBy: { tier: depth === 'deep' ? 'deep' : 'fast', model: tier.model },
+      answeredBy: { tier: answeredTier, model: tier.model },
     };
     return env.ASSISTANT_DEBUG_USAGE && env.NODE_ENV !== 'production' ? { ...result, debug: { usage } } : result;
   } catch (err) {

@@ -119,6 +119,12 @@ describe('reply checks', () => {
   it('flags figures no report contains, and lakh/crore figures for checking', () => {
     expect(unverifiedFigures('Revenue was ₹15,000, up 40%, nearly ₹1 crore.', facts)).toEqual(['₹15,000', '₹1 crore', '40%']);
   });
+  it('checks percentages written as words in English, Hindi and Gujarati', () => {
+    expect(unverifiedFigures('Up 12.3 percent, or 12.3 per cent.', facts)).toEqual([]);
+    expect(unverifiedFigures('Up 40 percent.', facts)).toEqual(['40 percent']);
+    expect(unverifiedFigures('बिक्री 40 प्रतिशत बढ़ी, 12.3 प्रतिशत नहीं।', facts)).toEqual(['40 प्रतिशत']);
+    expect(unverifiedFigures('વેચાણ 55 ટકા વધ્યું.', facts)).toEqual(['55 ટકા']);
+  });
   it('turns Hindi and Gujarati digits into 0-9 so the figure check sees them', () => {
     const reply = sanitizeReply('આજની આવક ₹૯,૯૯૯ છે, आज ₹६५१');
     expect(reply).toBe('આજની આવક ₹9,999 છે, आज ₹651');
@@ -180,6 +186,47 @@ describe('ownerTurn pipeline', () => {
     expect(out.answeredBy.tier).toBe('deep');
     expect(client.seen[3].options?.reasoningEffort).toBe('high');
     expect(client.seen[0].options?.reasoningEffort).toBe('minimal');
+  });
+
+  const deepPlan = () => [
+    call('query_metrics', { metrics: ['revenue'], period: 'this_week' }),
+    call('query_metrics', { metrics: ['orders'], period: 'this_week' }),
+    call('finish_research', { depth: 'deep' }),
+  ];
+
+  it('falls back to the fast tier when deep reasoning uses up the token cap', async () => {
+    const cutOff: ModelTurn = { message: { role: 'assistant', content: null }, finishReason: 'length' };
+    const client = scripted([...deepPlan(), cutOff, say('Revenue is level this week.')]);
+    const out = await run(client, 'Morning briefing please');
+    expect(out.depth).toBe('deep');
+    expect(out.reply).toBe('Revenue is level this week.');
+    expect(out.answeredBy.tier).toBe('fast');
+    expect(client.seen[3].options?.reasoningEffort).toBe('high');
+    expect(client.seen[4].options?.reasoningEffort).toBe('minimal');
+    expect(client.seen[4].tools).toEqual([]);
+    expect(client.seen[4].messages).toEqual(client.seen[3].messages);
+  });
+
+  it('falls back to the fast tier when the deep call fails', async () => {
+    const turns = [...deepPlan()];
+    const fallbackReply = say('Revenue is level this week.');
+    let n = 0;
+    const client: ModelClient & { seen: Seen[] } = {
+      seen: [],
+      async complete(messages, tools, options) {
+        client.seen.push({ messages, tools, options });
+        if (n++ === 3) throw Object.assign(new Error('timeout'), { status: 503 });
+        return (turns.shift() ?? fallbackReply) as ModelTurn;
+      },
+    };
+    const out = await run(client, 'Morning briefing please');
+    expect(out.reply).toBe('Revenue is level this week.');
+    expect(out.answeredBy.tier).toBe('fast');
+  });
+
+  it('asks the deep tier for enough tokens to reason and still answer', async () => {
+    const { tierOptions } = await import('../src/modules/assistant/owner/owner.service');
+    expect(tierOptions('deep').maxTokens).toBeGreaterThanOrEqual(6000);
   });
 
   it('asks for one rewrite when a figure is not in the reports, and keeps the better answer', async () => {
