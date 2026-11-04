@@ -79,14 +79,16 @@ Timings are cumulative. The voice-over (VO) is about 400 words at a natural pace
 
 **Screen:** README on GitHub: diagram, results table and test count. Then end on the owner dashboard.
 
-**VO:** "The guest assistant already ships inside Sprint Serve's multi-tenant platform, built to be switched on restaurant by restaurant as a paid add-on. It costs about forty paise per guest turn, with roughly a five-second wait. One hundred and ninety tests, open source, Apache-licensed. Built with Muse Spark."
+**VO:** "The guest assistant already ships inside Sprint Serve's multi-tenant platform, built to be switched on restaurant by restaurant as a paid add-on. It costs under a rupee per guest turn, with a wait of five to seven seconds. The owner's briefing takes about fifteen seconds. One hundred and ninety-six tests, open source, Apache-licensed. Built with Muse Spark."
 
 **End card:** "Sprint Serve · Muse Spark meal & owner assistants · github.com/itsmanudon/sprint-serve-ai-assistants"
 
 ## Claims: keep them true
 
 - Say "restaurants in Surat **use Sprint Serve**". The assistant itself is behind a per-restaurant rollout and is not yet live for a paying restaurant, so don't say it is.
-- "₹0.43 per turn, ~5 s" is the measured guest assistant (Sprint Serve, 30 Oct). Don't quote owner-side cost until you have measured it. The owner eval prints it.
+- Guest cost: ₹0.43 per turn p50 and ~5 s in Sprint Serve (30 Oct); ₹0.82 p50 and ~7 s in this repo's live eval (4 Nov). "Under a rupee, five to seven seconds" is true for both.
+- Owner (live eval, 4 Nov): 9/9 cases, ₹0.80 per question p50, ₹3.22 for a deep "what should I do" answer. The briefing takes ~15 s; "why" answers take 35–45 s, so trim them.
+- Hindi and Gujarati were checked by hand on the live model; the owner eval cases are English. Say "the owner can ask in Gujarati or Hindi", not "evaluated in".
 - If a live answer comes back with a flag ("figures need checking"), keep it in the video. It shows the safety check working.
 - The voice input is the browser's speech recognition, not a Meta model. Don't call it Muse.
 - Don't show `.env` or any key on screen.

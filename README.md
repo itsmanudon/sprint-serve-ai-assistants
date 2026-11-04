@@ -124,7 +124,7 @@ The whole loop is about 120 lines of our own code (`core/tool-loop.ts`), and it 
 
 ## Results so far
 
-These are from Sprint Serve's guest assistant on `muse-spark-1.3`, with a synthetic demo restaurant.
+**Guest assistant**, measured in Sprint Serve on `muse-spark-1.3` with a synthetic demo restaurant (30 Oct):
 
 | | |
 |---|---|
@@ -134,12 +134,21 @@ These are from Sprint Serve's guest assistant on `muse-spark-1.3`, with a synthe
 | Speed | 4.9 s guest wait p50 (7.5 s p90), 1.13 model calls per turn |
 | Total development spend | ≈ US$0.77 |
 
-The owner assistant is new in this repository. Run `npm run eval:owner -- --with-injection` with a real key to evaluate it on the live model; the report is written to `docs/evals/`.
+**This repository, live on `muse-spark-1.3`** (4 Nov, synthetic data; prices $1.25 / $4.25 per million input / output tokens, ₹88 to the dollar):
+
+| | Guest assistant | Owner assistant |
+|---|---|---|
+| Eval | 11/11 cases, 0 warnings ([report](docs/evals/2026-11-04-baseline.md)) | 9/9 cases, including the dish-name prompt injection, customer-data refusal and off-topic ([report](docs/evals/2026-11-04-owner.md)) |
+| Cost per turn | ₹0.82 p50 (few prompt-cache hits in this run) | ₹0.80 p50 per question; ₹3.22 for a deep "why … what should I do" answer |
+| Time per turn | 6.9 s p50 model time | 8.1 s p50; deep answers 14 s (briefing, low effort) to 35–44 s (medium / high effort) |
+| Eval spend | $0.12 | $0.10 |
+
+The owner eval cases are in English. Hindi and Gujarati answers were checked by hand on the live model (a Gujarati "what sold most", a Hindi "why are sales down"), with every figure verified; they are not yet eval cases.
 
 ## Tests and evals
 
 ```bash
-npm test                      # 189 tests, fake model, in-memory database, no network
+npm test                      # 196 tests, fake model, in-memory database, no network
 npm run typecheck
 npm run eval                  # scripted guest conversations against the running server
                               # needs a real key and ASSISTANT_DEBUG_USAGE=true; spend-capped; writes docs/evals/
