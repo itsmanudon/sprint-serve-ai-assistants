@@ -97,7 +97,7 @@ for (const c of CASES) {
   spent += usd;
   const verdict = check(c, status, data ?? {});
   results.push({ c, status, data, ms, usd, ...verdict });
-  console.log(`${c.id}: ${verdict.hard.length ? 'FAIL' : 'PASS'} hard=${verdict.hard.length} soft=${verdict.soft.length} depth=${data?.depth} reports=${data?.facts?.length ?? 0} ${ms}ms $${usd.toFixed(4)}`);
+  console.log(`${c.id}: ${verdict.hard.length ? 'FAIL' : 'PASS'} hard=${verdict.hard.length} soft=${verdict.soft.length} depth=${data?.depth}${data?.answeredBy?.tier === 'deep' ? `/${data.answeredBy.effort}` : ''} reports=${data?.facts?.length ?? 0} ${ms}ms $${usd.toFixed(4)}`);
 }
 
 const date = new Date().toISOString().slice(0, 10);
@@ -113,14 +113,14 @@ const lines = [
   ...results.map((r) =>
     r.skipped
       ? `| ${r.c.id} | skipped | | | | | |`
-      : `| ${r.c.id} | ${r.hard.length ? 'FAIL' : 'PASS'} | ${r.data?.depth ?? ''} | ${r.data?.facts?.length ?? 0} | ${(r.ms / 1000).toFixed(1)} s | ${md(r.hard.join('; '))} | ${md(r.soft.join('; '))} |`
+      : `| ${r.c.id} | ${r.hard.length ? 'FAIL' : 'PASS'} | ${r.data?.depth ?? ''}${r.data?.answeredBy?.tier === 'deep' ? ` (${r.data.answeredBy.effort})` : ''} | ${r.data?.facts?.length ?? 0} | ${(r.ms / 1000).toFixed(1)} s | ${md(r.hard.join('; '))} | ${md(r.soft.join('; '))} |`
   ),
   '',
   `${ran.filter((r) => !r.hard.length).length} of ${ran.length} passed.`,
   '',
   '## Answers',
   '',
-  ...ran.flatMap((r) => [`### ${r.c.id}`, '', `Q: ${r.c.ask}`, '', `A (${r.data?.answeredBy?.tier ?? '?'} · ${r.data?.answeredBy?.model ?? '?'}): ${md(r.data?.reply ?? r.data?.error)}`, '', `Reports: ${(r.data?.facts ?? []).map((f) => f.title).join('; ') || 'none'}`, '']),
+  ...ran.flatMap((r) => [`### ${r.c.id}`, '', `Q: ${r.c.ask}`, '', `A (${r.data?.answeredBy?.tier ?? '?'} · ${r.data?.answeredBy?.model ?? '?'}${r.data?.answeredBy?.effort ? ` · ${r.data.answeredBy.effort}` : ''}): ${md(r.data?.reply ?? r.data?.error)}`, '', `Reports: ${(r.data?.facts ?? []).map((f) => f.title).join('; ') || 'none'}`, '']),
 ];
 const out = args.out ?? resolve('docs/evals', `${date}-owner.md`);
 mkdirSync(dirname(out), { recursive: true });

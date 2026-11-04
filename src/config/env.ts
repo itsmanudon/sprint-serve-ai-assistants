@@ -35,7 +35,8 @@ const schema = z.object({
   ASSISTANT_FAST_MODEL: z.string().min(1).max(100).optional(),
   ASSISTANT_FAST_REASONING_EFFORT: z.enum(['minimal', 'low', 'medium', 'high']).default('minimal'),
   ASSISTANT_DEEP_MODEL: z.string().min(1).max(100).optional(),
-  ASSISTANT_DEEP_REASONING_EFFORT: z.enum(['minimal', 'low', 'medium', 'high', 'xhigh']).default('high'),
+  // Used when the owner planner does not pick an effort for a deep answer.
+  ASSISTANT_DEEP_REASONING_EFFORT: z.enum(['minimal', 'low', 'medium', 'high', 'xhigh']).default('medium'),
   ASSISTANT_DEEP_BASE_URL: z.string().url().optional(),
   ASSISTANT_DEEP_API_KEY: z.string().min(10).optional(),
   ASSISTANT_DEEP_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120000).default(45000),

@@ -97,17 +97,20 @@ owner question
   │            query_metrics(metrics[≤4], period, dimension?, compare, sort, limit) · orders_needing_attention
   │            → the server runs each report from a fixed metric registry, bound to this restaurant
   │              and the caller's permission scope, and returns aggregates only
-  │            → finish_research(depth: quick | deep)
+  │            → finish_research(depth: quick | deep, effort: low | medium | high)
   │
   ├─ 2. WRITE  quick → fast tier · deep ("why", "what should I do") → deep tier (more reasoning,
-  │            or a bigger model on another host). NO tools; the reports go in as a data block.
+  │            or a bigger model on another host), at the effort the planner picked for the
+  │            question: low for a briefing, medium for "why", high for "what should I do".
+  │            If the deep answer is cut off or fails, the fast tier writes it instead.
+  │            NO tools; the reports go in as a data block.
   │
   └─ 3. CHECK  strip links and markup; every ₹ amount and % must match a report value;
                one rewrite if not; anything still unmatched is shown to the owner as a flag
 ```
 
 - **The registry, not SQL.** There are 12 metrics (revenue, net sales, GST, orders, average order value, cancellations, assistant orders and share, fulfilment time, slow orders, items sold, dish sales). They can be split by day, weekday, hour, channel, dish or category, and compared with the previous equivalent period. The registry is shaped like Sprint Serve's insights registry, with ids, units, permission tags and allowed dimensions, so moving it into Sprint Serve means swapping the executor.
-- **Two model tiers, configured in `.env`.** Cheap, fast calls do the tool work. Deeper reasoning goes only into writing answers that need it. The deep tier can point at any OpenAI-compatible host.
+- **Two model tiers, configured in `.env`.** Cheap, fast calls do the tool work. Deeper reasoning goes only into writing answers that need it, and how much is decided per question (an allowed list of three efforts, checked by the server). The deep tier can point at any OpenAI-compatible host.
 - **Read-only and scoped.** No tool can change anything. Customer names, phones and notes are not in the registry, and every metric and split carries a permission tag.
 - **Prompt injection is contained by design.** The model that reads data has no tools, nothing can leave through links, and figures are verified. See [docs/SECURITY.md](docs/SECURITY.md).
 

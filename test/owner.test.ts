@@ -184,8 +184,38 @@ describe('ownerTurn pipeline', () => {
     const out = await run(client, 'Why were sales slow this week and what should I do?');
     expect(out.depth).toBe('deep');
     expect(out.answeredBy.tier).toBe('deep');
-    expect(client.seen[3].options?.reasoningEffort).toBe('high');
+    // No effort from the planner: ASSISTANT_DEEP_REASONING_EFFORT, default "medium".
+    expect(client.seen[3].options?.reasoningEffort).toBe('medium');
+    expect(out.answeredBy.effort).toBe('medium');
     expect(client.seen[0].options?.reasoningEffort).toBe('minimal');
+  });
+
+  it('runs the deep write at the effort the planner chose for the question', async () => {
+    for (const effort of ['low', 'high'] as const) {
+      const client = scripted([
+        call('query_metrics', { metrics: ['revenue'], period: 'yesterday' }),
+        call('query_metrics', { metrics: ['revenue'], period: 'this_week' }),
+        call('finish_research', { depth: 'deep', effort }),
+        say('Revenue is level.'),
+      ]);
+      const out = await run(client, 'Morning briefing please');
+      expect(client.seen[3].options?.reasoningEffort).toBe(effort);
+      expect(out.answeredBy).toMatchObject({ tier: 'deep', effort });
+    }
+  });
+
+  it('rejects an effort outside the allowed list and lets the planner try again', async () => {
+    const client = scripted([
+      call('query_metrics', { metrics: ['revenue'], period: 'this_week' }),
+      call('query_metrics', { metrics: ['orders'], period: 'this_week' }),
+      call('finish_research', { depth: 'deep', effort: 'xhigh' }),
+      call('finish_research', { depth: 'deep', effort: 'low' }),
+      say('Revenue is level.'),
+    ]);
+    const out = await run(client, 'Briefing');
+    const toPlanner = client.seen[3].messages.at(-1)!.content as string;
+    expect(JSON.parse(toPlanner).error).toMatch(/Invalid arguments/);
+    expect(out.answeredBy.effort).toBe('low');
   });
 
   const deepPlan = () => [
@@ -200,8 +230,8 @@ describe('ownerTurn pipeline', () => {
     const out = await run(client, 'Morning briefing please');
     expect(out.depth).toBe('deep');
     expect(out.reply).toBe('Revenue is level this week.');
-    expect(out.answeredBy.tier).toBe('fast');
-    expect(client.seen[3].options?.reasoningEffort).toBe('high');
+    expect(out.answeredBy).toMatchObject({ tier: 'fast', effort: 'minimal' });
+    expect(client.seen[3].options?.reasoningEffort).toBe('medium');
     expect(client.seen[4].options?.reasoningEffort).toBe('minimal');
     expect(client.seen[4].tools).toEqual([]);
     expect(client.seen[4].messages).toEqual(client.seen[3].messages);

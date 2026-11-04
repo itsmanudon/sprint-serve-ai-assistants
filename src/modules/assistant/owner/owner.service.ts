@@ -23,7 +23,7 @@ import {
   type MetricResult,
   type PermissionTag,
 } from './owner.metrics';
-import { finishArgs, plannerPrompt, plannerTools, writerPrompt } from './owner.prompt';
+import { finishArgs, plannerPrompt, plannerTools, writerPrompt, type DeepEffort } from './owner.prompt';
 import { openOrders } from './owner.repository';
 import type { OwnerTurnInput } from './owner.types';
 
@@ -63,20 +63,26 @@ export interface OwnerTurnResult {
   facts: OwnerFact[];
   /** ₹ amounts or percentages in the reply that no report contains. */
   unverifiedFigures: string[];
-  /** Which model wrote the answer (tier name and model id). */
-  answeredBy: { tier: 'fast' | 'deep'; model: string };
+  /** Which model wrote the answer: tier, model id and the reasoning effort it ran at. */
+  answeredBy: { tier: 'fast' | 'deep'; model: string; effort: string };
   debug?: { usage: TurnUsage };
 }
 
-export function tierOptions(depth: Depth): CallOptions & { model: string } {
+/**
+ * The deep tier's effort comes from the planner, per question (a briefing needs less
+ * reasoning than "what should I do"), and is limited to DEEP_EFFORTS by finishArgs.
+ * Without one, ASSISTANT_DEEP_REASONING_EFFORT applies.
+ */
+export function tierOptions(depth: Depth, effort?: DeepEffort): CallOptions & { model: string; reasoningEffort: string } {
   return depth === 'deep'
     ? {
         model: env.ASSISTANT_DEEP_MODEL ?? env.ASSISTANT_MODEL,
-        reasoningEffort: env.ASSISTANT_DEEP_REASONING_EFFORT,
+        reasoningEffort: effort ?? env.ASSISTANT_DEEP_REASONING_EFFORT,
         baseUrl: env.ASSISTANT_DEEP_BASE_URL,
         apiKey: env.ASSISTANT_DEEP_API_KEY,
-        // Reasoning tokens count against this cap. On muse-spark-1.3 at "high" effort the
-        // morning briefing reasoned for ~3,300 tokens, so 2,500 left no room for the answer.
+        // Reasoning tokens count against this cap. On muse-spark-1.3 the morning briefing
+        // reasoned for ~3,000-3,700 tokens at "medium" and "high", so 2,500 left no room for
+        // the answer.
         maxTokens: 6000,
         timeoutMs: env.ASSISTANT_DEEP_TIMEOUT_MS,
       }
@@ -187,11 +193,12 @@ export async function ownerTurn(
   const usage = emptyUsage();
   const facts: OwnerFact[] = [];
   let depth: Depth = 'quick';
+  let effort: DeepEffort | undefined;
   let outcome = 'unavailable';
 
   try {
     // 1. PLAN
-    const planned = await runToolLoop<Depth>({
+    const planned = await runToolLoop<{ depth: Depth; effort?: DeepEffort }>({
       client,
       usage,
       maxCalls: MAX_PLANNER_CALLS,
@@ -199,12 +206,12 @@ export async function ownerTurn(
       tools: plannerTools(scope),
       messages: [{ role: 'system', content: plannerPrompt(name, localNow, metricCatalog(scope)) }, ...history],
       // A planner that answers in prose instead of finishing: its text is discarded.
-      onText: () => (facts.length > 1 ? 'deep' : 'quick'),
-      onExhausted: () => (facts.length > 1 ? 'deep' : 'quick'),
+      onText: () => ({ depth: facts.length > 1 ? 'deep' : 'quick' }),
+      onExhausted: () => ({ depth: facts.length > 1 ? 'deep' : 'quick' }),
       onToolCall: async (call) => {
         try {
           const raw = JSON.parse(call.function.arguments || '{}');
-          if (call.function.name === 'finish_research') return { content: { ok: true }, done: finishArgs.parse(raw).depth };
+          if (call.function.name === 'finish_research') return { content: { ok: true }, done: finishArgs.parse(raw) };
           if (facts.length >= MAX_REPORTS)
             return { content: { error: `At most ${MAX_REPORTS} reports per question. Call finish_research now.` } };
           if (call.function.name === 'query_metrics') {
@@ -232,10 +239,10 @@ export async function ownerTurn(
         }
       },
     });
-    depth = planned.result;
+    ({ depth, effort } = planned.result);
 
     // 2. WRITE (no tools; reports as data in the final message)
-    let tier = tierOptions(depth);
+    let tier = tierOptions(depth, effort);
     let answeredTier: 'fast' | 'deep' = depth === 'deep' ? 'deep' : 'fast';
     const reports = JSON.stringify(facts.map((f) => ({ report: f.title, data: f.data })));
     const writerMessages: ChatMessage[] = [
@@ -288,7 +295,7 @@ export async function ownerTurn(
       depth,
       facts,
       unverifiedFigures: misses,
-      answeredBy: { tier: answeredTier, model: tier.model },
+      answeredBy: { tier: answeredTier, model: tier.model, effort: tier.reasoningEffort },
     };
     return env.ASSISTANT_DEBUG_USAGE && env.NODE_ENV !== 'production' ? { ...result, debug: { usage } } : result;
   } catch (err) {
@@ -297,7 +304,7 @@ export async function ownerTurn(
     throw assistantUnavailable();
   } finally {
     // Counts and status only: never the question, the reports or the answer.
-    logger.info('assistant.turn', { side: 'owner', restaurantId, depth, reports: facts.length, ...usage, outcome });
+    logger.info('assistant.turn', { side: 'owner', restaurantId, depth, ...(effort && { effort }), reports: facts.length, ...usage, outcome });
   }
 }
 

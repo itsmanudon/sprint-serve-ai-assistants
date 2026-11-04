@@ -10,8 +10,13 @@ import { PERIODS } from './owner.periods';
  *   has no tools at all, so nothing in the data can make it run anything.
  */
 
+/** Reasoning effort the planner may ask for on a deep answer. Anything else is rejected. */
+export const DEEP_EFFORTS = ['low', 'medium', 'high'] as const;
+export type DeepEffort = (typeof DEEP_EFFORTS)[number];
+
 export const finishArgs = z.object({
   depth: z.enum(['quick', 'deep']),
+  effort: z.enum(DEEP_EFFORTS).optional(),
 });
 
 export function plannerTools(scope: ReadonlySet<PermissionTag>): ToolDefinition[] {
@@ -43,8 +48,20 @@ export function plannerTools(scope: ReadonlySet<PermissionTag>): ToolDefinition[
       function: {
         name: 'finish_research',
         description:
-          'Call once you have the reports needed. depth "quick" for a direct lookup (one or two numbers); "deep" when the owner asks why, what to do, for a comparison across several reports, or for advice.',
-        parameters: { type: 'object', properties: { depth: { type: 'string', enum: ['quick', 'deep'] } }, required: ['depth'] },
+          'Call once you have the reports needed. depth "quick" for a direct lookup (one or two numbers); "deep" when the owner asks why, what to do, for a comparison across several reports, or for advice. For "deep", also set effort by how much reasoning the answer needs.',
+        parameters: {
+          type: 'object',
+          properties: {
+            depth: { type: 'string', enum: ['quick', 'deep'] },
+            effort: {
+              type: 'string',
+              enum: [...DEEP_EFFORTS],
+              description:
+                'Only for depth "deep". "low": a summary or briefing that restates several reports without explaining causes. "medium": explaining why something changed. "high": advice or a plan that weighs several causes against each other ("what should I do").',
+            },
+          },
+          required: ['depth'],
+        },
       },
     },
   ];
